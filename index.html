@@ -212,10 +212,15 @@
 
   @media (max-width:860px){
     .hero-split{grid-template-columns:1fr;}
-    .hero-photo-card{max-width:300px; margin:0 auto 26px; order:1;}
-    .hero-text{order:2;}
-    .hero{padding-top:120px;}
-    .hero p.lead{font-size:0.95rem; margin-bottom:24px;}
+    .hero-photo-card{max-width:220px; margin:0 auto 20px; order:1;}
+    .hero-text{order:2; display:flex; flex-direction:column;}
+    .hero-text .eyebrow{order:3;}
+    .hero-text h1{order:3;}
+    .hero-text .hero-subtitle{order:3; margin-bottom:14px;}
+    .hero-text .hero-actions{order:1; margin-bottom:16px;}
+    .hero-text .hero-links-row{order:4; margin-top:10px;}
+    .hero{padding-top:110px;}
+    .hero p.lead{order:5; font-size:0.95rem; margin-bottom:20px;}
     .hero-action-card{padding:16px 14px;}
   }
   @media (max-width:420px){
