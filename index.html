@@ -1145,5 +1145,15 @@ document.documentElement.classList.add('js');
   addEventListener('scroll',hf,{passive:true}); hf();
 })();
 </script>
+<script>(function(){
+function pre(){var ims=[].slice.call(document.querySelectorAll('img')),i=0;
+ function step(){var t=Date.now();while(i<ims.length&&Date.now()-t<8){var im=ims[i++];if(im.decode)im.decode().catch(function(){});}
+  if(i<ims.length)(window.requestIdleCallback||setTimeout)(step,{timeout:200});}
+ step();
+ var f=document.querySelector('.ig video');
+ if(f&&'IntersectionObserver' in window){var o=new IntersectionObserver(function(e){if(e[0].isIntersecting){document.querySelectorAll('.ig video').forEach(function(v,k){v.preload=k?'metadata':'auto';});o.disconnect();}},{rootMargin:'900px 0px'});o.observe(f);}
+}
+if(document.readyState==='complete')setTimeout(pre,300);else addEventListener('load',function(){setTimeout(pre,300)});
+})();</script>
 </body>
 </html>
