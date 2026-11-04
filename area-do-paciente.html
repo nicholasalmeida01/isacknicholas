@@ -3,278 +3,366 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Área do Paciente — Isack Nícholas Fisioterapia</title>
+<title>Área do paciente · Isack Nícholas Fisioterapia</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#F1F2F0">
+<meta name="theme-color" content="#8D9397">
+<link rel="preload" href="fonts/kaluk-sans-300.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/kaluk-sans-700.woff2" as="font" type="font/woff2" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  @font-face{font-family:'Kaluk Sans';src:url(/fonts/kaluk-sans-300.woff2) format('woff2');font-weight:300;font-display:swap}
-  @font-face{font-family:'Kaluk Sans';src:url(/fonts/kaluk-sans-400.woff2) format('woff2');font-weight:400;font-display:swap}
-  @font-face{font-family:'Kaluk Sans';src:url(/fonts/kaluk-sans-500.woff2) format('woff2');font-weight:500;font-display:swap}
-  @font-face{font-family:'Kaluk Sans';src:url(/fonts/kaluk-sans-700.woff2) format('woff2');font-weight:700;font-display:swap}
-  /* Mesma identidade da nova home: cinza da foto, papel claro, tinta quase preta, Kaluk Sans */
-  :root{
-    --stone:#8D9397; --stone-deep:#7F868A; --paper:#F1F2F0; --card:#FAFAF8; --white:#fff;
-    --ink:#121517; --ink-soft:#2C3235; --muted:#5E666A; --line:rgba(18,21,23,.14); --line-strong:rgba(18,21,23,.35);
-    --ok:#2F6B4A; --ok-bg:#E3ECE6; --warn:#7A4A2A; --warn-bg:#EFE6DF;
-    --font:'Kaluk Sans','Futura','Century Gothic',system-ui,sans-serif;
-    --radius:clamp(18px,2vw,26px); --ease:cubic-bezier(.2,.7,.1,1);
-    --safe-b: env(safe-area-inset-bottom, 0px);
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{overflow-x:hidden}
-  body{font-family:var(--font);background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
-  a{color:inherit}
-  button{font:inherit;cursor:pointer;color:inherit}
-  .hidden{display:none!important}
-  .brand{font-weight:700;font-size:.95rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;text-decoration:none}
-  .brand span{color:inherit}
-  .eyebrow{font-size:.7rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .eyebrow::before{content:"";width:30px;height:1.5px;background:currentColor}
+@font-face{font-family:'Kaluk Sans';src:url(fonts/kaluk-sans-300.woff2) format('woff2');font-weight:300;font-display:swap}
+@font-face{font-family:'Kaluk Sans';src:url(fonts/kaluk-sans-400.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Kaluk Sans';src:url(fonts/kaluk-sans-500.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Kaluk Sans';src:url(fonts/kaluk-sans-700.woff2) format('woff2');font-weight:700;font-display:swap}
 
-  /* ---------- Auth (tela cinza da home) ---------- */
-  .auth{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:var(--stone)}
-  .auth-card{width:100%;max-width:420px;background:var(--paper);border-radius:var(--radius);padding:clamp(28px,4vw,40px);box-shadow:0 24px 60px rgba(18,21,23,.14)}
-  .auth h1{font-size:clamp(2.2rem,8vw,2.9rem);font-weight:700;line-height:.95;letter-spacing:-.04em;margin:30px 0 12px}
-  .auth h1 span{display:block;font-weight:300}
-  .auth p.sub{color:var(--muted);margin-bottom:26px;font-weight:300}
-  .seg{display:flex;border-bottom:1px solid var(--line);margin-bottom:8px}
-  .seg button{flex:1;border:0;background:transparent;padding:12px 4px;font-size:.74rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);position:relative}
-  .seg button.on{color:var(--ink);font-weight:700}
-  .seg button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1.5px;background:var(--ink)}
-  label{display:block;font-size:.68rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:20px 0 4px}
-  input[type=text],input[type=email],input[type=password],input[type=tel]{width:100%;padding:10px 2px;border:0;border-bottom:1px solid var(--line-strong);border-radius:0;background:transparent;font:inherit;color:var(--ink);font-size:1.05rem;transition:border-color .3s}
-  input:focus{outline:none;border-color:var(--ink)}
-  input.code{letter-spacing:.24em;text-transform:uppercase;font-size:1.3rem;font-weight:500;text-align:center}
-  .check{display:flex;gap:10px;align-items:flex-start;margin-top:20px;font-size:.86rem;color:var(--muted);font-weight:300}
-  .check input{margin-top:3px;accent-color:var(--ink);width:17px;height:17px;flex:none}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);text-decoration:none;transition:background .3s,color .3s}
-  .btn:hover{background:var(--ink);color:var(--white)}
-  .btn-primary{background:var(--ink);color:var(--white);width:100%;margin-top:28px}
-  .btn-primary:hover{background:transparent;color:var(--ink)}
-  .btn-primary:disabled{opacity:.5;cursor:wait}
-  .btn-ghost{width:auto}
-  .btn-sm{padding:9px 16px;font-size:.7rem}
-  .link{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:.86rem;margin-top:16px;font-weight:300}
-  .msg{margin-top:16px;font-size:.88rem;padding:12px 14px;border-radius:12px}
-  .msg.err{background:var(--warn-bg);color:var(--warn)}
-  .msg.ok{background:var(--ok-bg);color:var(--ok)}
-  .hello{border-left:1.5px solid var(--ink);padding:4px 0 4px 14px;margin-top:18px;font-size:1rem;font-weight:300}
-  .hello b{font-weight:700}
-  .auth-foot{margin-top:26px;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);text-align:center;font-weight:500}
-  .auth-foot a{text-decoration:none}
+/* Identidade da nova home: o cinza da foto, papel claro, tinta, Kaluk Sans com contraste 700/300 */
+:root{
+  --stone:#8D9397; --stone-deep:#7F868A; --paper:#F1F2F0; --sheet:#FAFAF8; --white:#FFFFFF;
+  --ink:#121517; --ink-soft:#2C3235; --muted:#5E666A; --line:rgba(18,21,23,.13); --line-2:rgba(18,21,23,.32);
+  --font:'Kaluk Sans','Futura','Century Gothic',system-ui,sans-serif;
+  --ease:cubic-bezier(.2,.7,.1,1);
+  --gut:clamp(18px,4vw,56px);
+  --sb:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+body{font-family:var(--font);font-size:16px;line-height:1.55;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+.hidden{display:none!important}
+:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px}
+.brand{font-weight:700;font-size:.9rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;text-decoration:none}
 
-  /* ---------- App ---------- */
-  .top{position:sticky;top:0;z-index:20;background:rgba(241,242,240,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  .top-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px clamp(16px,4vw,40px)}
-  .avatar{width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--white);border:0;font-weight:700;font-size:.78rem;letter-spacing:.08em}
-  main{max-width:1080px;margin:0 auto;padding:30px clamp(16px,4vw,40px) calc(100px + var(--safe-b))}
-  .view h2{font-size:clamp(2.2rem,6vw,3.4rem);font-weight:700;line-height:.95;letter-spacing:-.04em;margin-bottom:12px}
-  .view h2 span{font-weight:300;color:var(--muted)}
-  .view .lead{color:var(--muted);margin-bottom:28px;font-weight:300;max-width:52ch}
+/* botões: os mesmos da home */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap;font-size:.76rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:14px 24px;border:1.5px solid var(--ink);border-radius:999px;color:var(--ink);text-decoration:none;transition:background .3s,color .3s}
+.btn:hover{background:var(--ink);color:var(--white)}
+.btn.solid{background:var(--ink);color:var(--white)}
+.btn.solid:hover{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:wait}
+.btn.sm{padding:9px 16px;font-size:.68rem}
+.txt-link{font-weight:300;color:var(--ink-soft);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
 
-  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(250,250,248,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
-  .tabs-in{max-width:620px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-  .tabs button{border:0;background:none;padding:10px 2px 11px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:.6rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;position:relative}
-  .tabs button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.4}
-  .tabs button.on{color:var(--ink);font-weight:700}
-  .tabs button.on::before{content:"";position:absolute;top:-1px;left:32%;right:32%;height:1.5px;background:var(--ink)}
-  .badge{position:absolute;top:5px;left:calc(50% + 6px);background:var(--ink);color:var(--white);border-radius:999px;font-size:.58rem;min-width:16px;height:16px;line-height:16px;padding:0 4px;text-align:center;letter-spacing:0}
+/* ===================== ENTRADA ===================== */
+.auth{min-height:100vh;min-height:100svh;background:var(--stone);display:grid;grid-template-rows:auto 1fr auto;padding:calc(22px + env(safe-area-inset-top,0px)) var(--gut) calc(22px + var(--sb))}
+.auth-top{display:flex;justify-content:space-between;align-items:center}
+.auth-top a.back{font-size:.9rem;font-weight:300;text-decoration:none;color:var(--ink-soft)}
+.auth-main{display:grid;align-items:center;gap:clamp(36px,6vw,90px);padding:clamp(40px,8vh,90px) 0 30px}
+@media (min-width:900px){.auth-main{grid-template-columns:1.1fr minmax(340px,420px)}}
+.auth h1{font-weight:700;font-size:clamp(3.4rem,10vw,7.6rem);line-height:.88;letter-spacing:-.045em}
+.auth h1 span{display:block;font-weight:300;color:var(--white)}
+.auth .lede{margin-top:26px;max-width:32ch;font-size:1.08rem;font-weight:300;color:var(--ink-soft);line-height:1.55}
+.auth-form{width:100%}
+.switch{display:flex;gap:26px;margin-bottom:6px}
+.switch button{font-size:1.25rem;font-weight:300;color:var(--ink-soft);padding:4px 0;letter-spacing:-.01em}
+.switch button.on{font-weight:700;color:var(--ink)}
+.field{display:block;margin-top:22px}
+.field span{display:block;font-size:.84rem;color:var(--ink-soft);margin-bottom:2px}
+.field input{width:100%;background:transparent;border:0;border-bottom:1.5px solid rgba(18,21,23,.4);border-radius:0;padding:9px 0 10px;font:inherit;font-size:1.15rem;color:var(--ink);transition:border-color .3s}
+.field input::placeholder{color:rgba(18,21,23,.38)}
+.field input:focus{outline:none;border-color:var(--ink)}
+.field input.code{font-size:1.6rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase}
+.auth .btn.solid{width:100%;margin-top:30px;padding:16px}
+.auth .hint{margin-top:10px;font-size:.88rem;font-weight:300;color:var(--ink-soft)}
+.auth .check{display:flex;gap:12px;align-items:flex-start;margin-top:22px;font-size:.9rem;font-weight:300;color:var(--ink-soft)}
+.auth .check input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:var(--ink)}
+.auth .below{display:flex;justify-content:space-between;gap:16px;margin-top:18px;font-size:.9rem}
+.hello{margin-top:18px;font-size:1.3rem;font-weight:300;line-height:1.3}
+.hello b{font-weight:700}
+.note{margin-top:18px;font-size:.92rem;line-height:1.45;padding:12px 16px;border-radius:14px}
+.note.err{background:rgba(255,255,255,.55);color:#6B2E16}
+.note.ok{background:rgba(255,255,255,.55);color:var(--ink)}
+.auth-foot{font-size:.84rem;font-weight:300;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 
-  @media (min-width:861px){
-    .tabs{position:sticky;top:71px;bottom:auto;border-top:0;border-bottom:1px solid var(--line);background:rgba(241,242,240,.86)}
-    .tabs-in{max-width:1080px;display:flex;gap:clamp(18px,2.4vw,34px);padding:0 clamp(16px,4vw,40px)}
-    .tabs button{flex-direction:row;font-size:.74rem;letter-spacing:.14em;padding:16px 0;gap:8px}
-    .tabs button svg{display:none}
-    .tabs button.on::before{top:auto;bottom:-1px;left:0;right:0}
-    .badge{position:static;margin-left:2px}
-    main{padding-bottom:70px}
-  }
+/* ===================== APP ===================== */
+.shell{min-height:100vh}
+.mtop{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) var(--gut) 14px;background:rgba(241,242,240,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.me{width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--white);font-weight:700;font-size:.76rem;letter-spacing:.06em}
+.side{display:none}
+main{padding:8px var(--gut) calc(120px + var(--sb));max-width:1040px}
 
-  /* ---------- Cards ---------- */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(20px,2.4vw,28px);margin-bottom:16px}
-  .card h3{font-size:1.25rem;font-weight:500;letter-spacing:-.02em;line-height:1.2}
-  .muted{color:var(--muted);font-size:.9rem;font-weight:300}
-  .grid2{display:grid;gap:16px}
-  @media (min-width:700px){.grid2{grid-template-columns:1fr 1fr}.grid2 .card{margin-bottom:0}.grid2{margin-bottom:16px}}
-  .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .pill{display:inline-block;font-size:.62rem;font-weight:700;padding:5px 11px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink-soft);text-transform:uppercase;letter-spacing:.14em;white-space:nowrap}
-  .pill.amber,.pill.blue{background:var(--ink);border-color:var(--ink);color:var(--white)}
-  .pill.ok{background:var(--ok-bg);border-color:transparent;color:var(--ok)}
-  .home-hero{background:var(--stone);color:var(--ink);border:0;position:relative;overflow:hidden}
-  .home-hero .muted{color:var(--ink-soft)}
-  .home-hero .lbl{font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
-  .big-date{font-size:clamp(1.6rem,5vw,2.3rem);font-weight:700;letter-spacing:-.03em;line-height:1.05;margin-top:10px}
-  .big-date span{font-weight:300;color:var(--white)}
-  .clickable{cursor:pointer;transition:border-color .3s,transform .45s var(--ease)}
-  .clickable:hover{border-color:var(--line-strong)}
-  .go{display:inline-flex;gap:8px;align-items:center;font-size:.86rem;font-weight:300;color:var(--ink-soft);padding:4px 14px 5px 10px;border-left:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);margin-top:16px;text-decoration:none;transition:color .25s,border-color .25s}
-  .go:hover{color:var(--ink);border-color:var(--ink)}
+/* dock no celular */
+.dock{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + var(--sb));max-width:480px;margin:0 auto;background:var(--ink);border-radius:999px;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;box-shadow:0 14px 40px rgba(18,21,23,.28)}
+.dock button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;border-radius:999px;color:rgba(255,255,255,.55);font-size:.66rem;font-weight:500;transition:background .3s,color .3s}
+.dock svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.5}
+.dock button.on{background:rgba(255,255,255,.12);color:var(--white)}
+.dock .dot{position:absolute;top:7px;left:calc(50% + 7px);width:7px;height:7px;border-radius:50%;background:var(--stone);box-shadow:0 0 0 2px var(--ink)}
 
-  /* semana */
-  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
-  .day{text-align:center;font-size:.6rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-  .day .dot{width:32px;height:32px;margin:6px auto 0;border-radius:50%;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:.8rem;letter-spacing:0;color:var(--ink-soft);font-weight:400}
-  .day.done .dot{background:var(--ink);border-color:var(--ink);color:var(--white)}
-  .day.today .dot{border-width:2px;border-color:var(--ink)}
+@media (min-width:960px){
+  .mtop,.dock{display:none}
+  .shell{display:grid;grid-template-columns:280px 1fr}
+  .side{display:flex;flex-direction:column;position:sticky;top:0;height:100vh;padding:34px 34px 30px 40px;border-right:1px solid var(--line)}
+  .side nav{margin-top:auto;margin-bottom:auto;display:flex;flex-direction:column;gap:4px}
+  .side nav button{text-align:left;font-size:2rem;font-weight:300;letter-spacing:-.03em;line-height:1.25;color:var(--muted);display:flex;align-items:center;gap:12px;transition:color .25s,transform .45s var(--ease)}
+  .side nav button:hover{color:var(--ink);transform:translateX(6px)}
+  .side nav button.on{font-weight:700;color:var(--ink)}
+  .side nav .dot{width:8px;height:8px;border-radius:50%;background:var(--ink)}
+  .side .who{font-size:.92rem;line-height:1.4}
+  .side .who b{display:block;font-weight:500}
+  .side .who button{font-weight:300;color:var(--muted);text-decoration:underline;text-underline-offset:3px;margin-top:6px;margin-right:14px}
+  main{padding:44px clamp(36px,5vw,80px) 90px}
+}
 
-  /* exercícios */
-  .ex{padding:0;overflow:hidden}
-  .ex-video{position:relative;aspect-ratio:16/9;background:var(--stone) center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--white);border:0;width:100%}
-  .ex-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-  .ex-video .play{width:64px;height:64px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center;transition:transform .45s var(--ease)}
-  .ex-video:hover .play{transform:scale(1.08)}
-  .ex-video .play svg{width:22px;height:22px;fill:var(--ink);margin-left:4px}
-  .ex-video.none{font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
-  .ex-body{padding:20px clamp(20px,2.4vw,26px) 24px}
-  .ex-num{font-size:.66rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-  .dose{display:flex;flex-wrap:wrap;gap:0;margin:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .dose div{padding:10px 18px 10px 0;margin-right:18px;font-size:.6rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-  .dose b{display:block;font-size:1.1rem;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--ink);margin-top:2px}
-  .tip{font-size:.9rem;color:var(--ink-soft);font-weight:300;border-left:1.5px solid var(--ink);padding-left:12px;margin-top:12px}
-  .tip b{font-weight:700}
-  .done-btn{width:100%;margin-top:20px}
-  .done-btn.on{background:var(--ink);color:var(--white)}
-  @media (min-width:861px){.ex-list{display:grid;grid-template-columns:1fr 1fr;gap:16px}.ex-list .card{margin:0}}
+/* ===================== TIPOGRAFIA DAS PÁGINAS ===================== */
+.page-h{font-weight:700;font-size:clamp(2.7rem,7vw,5rem);line-height:.92;letter-spacing:-.045em}
+.page-h span{font-weight:300}
+.page-lede{margin-top:16px;max-width:46ch;font-size:1.05rem;font-weight:300;color:var(--muted)}
+.sec{margin-top:clamp(44px,6vw,72px)}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.sec-h h2{font-size:1.5rem;font-weight:500;letter-spacing:-.02em}
+.sec-h .aside{font-size:.95rem;font-weight:300;color:var(--muted)}
+.sec-h a,.sec-h button.more{font-size:.95rem;font-weight:300;color:var(--ink-soft);text-decoration:underline;text-underline-offset:4px}
+.muted{color:var(--muted);font-weight:300}
+.empty{padding:28px 0;font-size:1.05rem;font-weight:300;color:var(--muted);max-width:44ch}
 
-  /* avaliações */
-  .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0;margin-top:18px;border-top:1px solid var(--line)}
-  .metric{padding:12px 12px 12px 0;border-bottom:1px solid var(--line)}
-  .metric .n{font-size:.62rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-  .metric .v{font-size:1.6rem;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-top:2px}
-  .metric .v small{font-size:.8rem;color:var(--muted);font-weight:300;margin-left:3px;letter-spacing:0}
-  .evo{display:grid}
-  .evo-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
-  .evo-row:last-child{border-bottom:0}
-  .evo-row .val{font-size:1.4rem;font-weight:700;letter-spacing:-.03em}
-  .evo-row .val span{font-weight:300;color:var(--muted)}
-  .evo-row svg{width:120px;height:36px}
+/* ===================== INÍCIO ===================== */
+.hero{background:var(--stone);border-radius:clamp(26px,3.6vw,48px) clamp(26px,3.6vw,48px) clamp(26px,3.6vw,48px) 6px;padding:clamp(28px,4.5vw,60px);margin-top:8px;position:relative;overflow:hidden}
+.hero h1{font-weight:700;font-size:clamp(3rem,9vw,6.4rem);line-height:.88;letter-spacing:-.045em}
+.hero h1 span{display:block;font-weight:300;color:var(--white)}
+.hero .next{margin-top:clamp(30px,5vw,56px);padding-top:20px;border-top:1px solid rgba(18,21,23,.22);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:18px}
+.hero .next p{font-size:clamp(1.1rem,2.2vw,1.45rem);font-weight:300;line-height:1.35;max-width:30ch;color:var(--ink)}
+.hero .next p b{font-weight:700}
+.hero .next small{display:block;margin-top:6px;font-size:.9rem;color:var(--ink-soft)}
+.hero .btn{border-color:var(--ink)}
 
-  /* recados */
-  .recado{position:relative}
-  .recado.novo{border-color:var(--ink)}
-  .recado.novo::after{content:"Novo";position:absolute;top:clamp(20px,2.4vw,28px);right:clamp(20px,2.4vw,28px);font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;background:var(--ink);color:var(--white);padding:4px 10px;border-radius:999px}
-  .recado p{white-space:pre-wrap;font-weight:300;font-size:1.02rem}
-  .recado .muted{font-size:.66rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:18px 0 6px;max-width:420px}
+.wd{text-align:center;font-size:.78rem;color:var(--muted)}
+.wd i{display:block;margin:6px auto 0;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);font-style:normal;line-height:28px;font-size:.82rem;color:var(--ink-soft)}
+.wd.done i{background:var(--ink);border-color:var(--ink);color:var(--white)}
+.wd.today i{box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--ink)}
 
-  /* agenda */
-  .ag{display:flex;gap:20px;align-items:center}
-  .ag-date{flex:none;width:64px;text-align:center;border-right:1px solid var(--line);padding-right:18px}
-  .ag-date .d{font-size:2rem;font-weight:700;letter-spacing:-.04em;line-height:1}
-  .ag-date .m{font-size:.62rem;font-weight:500;text-transform:uppercase;color:var(--muted);letter-spacing:.18em;margin-top:4px}
-  .past{opacity:.55}
-  .section-t{font-size:.68rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:34px 0 14px;display:flex;align-items:center;gap:12px}
-  .section-t::before{content:"";width:30px;height:1.5px;background:currentColor}
+.routine{list-style:none}
+.routine li{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.tick{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line-2);display:flex;align-items:center;justify-content:center;transition:background .25s,border-color .25s,transform .35s var(--ease)}
+.tick svg{width:15px;height:15px;stroke:var(--white);stroke-width:2.4;fill:none;opacity:0;transition:opacity .2s}
+.tick:hover{border-color:var(--ink)}
+.tick.on{background:var(--ink);border-color:var(--ink)}
+.tick.on svg{opacity:1}
+.tick:active{transform:scale(.88)}
+.routine .nm{font-size:1.12rem;font-weight:500;letter-spacing:-.01em;line-height:1.25}
+.routine .ds{font-size:.92rem;font-weight:300;color:var(--muted);margin-top:2px}
+.routine li.is-done .nm{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.routine .open{font-size:.88rem;font-weight:300;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 
-  .empty{text-align:center;padding:40px 18px;color:var(--muted);font-weight:300}
-  .wide{width:100%;margin-top:8px}
-  .demo-bar{background:var(--ink);color:var(--white);text-align:center;font-size:.64rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;padding:8px 12px}
-  .loader{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--muted);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase}
-  .modal{position:fixed;inset:0;background:rgba(18,21,23,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
-  .modal-box{background:var(--paper);width:100%;max-width:560px;max-height:85vh;overflow:auto;border-radius:var(--radius) var(--radius) 0 0;padding:28px 24px calc(24px + var(--safe-b))}
-  .modal-box h3{font-size:1.5rem;font-weight:700;letter-spacing:-.03em;margin-bottom:14px}
-  .modal-box p,.modal-box li{font-size:.92rem;color:var(--ink-soft);margin-bottom:10px;font-weight:300}
-  .modal-box b{font-weight:700;color:var(--ink)}
-  .modal-box ul{padding-left:18px}
-  @media (min-width:700px){.modal{align-items:center}.modal-box{border-radius:var(--radius)}}
-  .view:not(.hidden){animation:fadeup .6s var(--ease)}
-  @keyframes fadeup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-  @media (prefers-reduced-motion:reduce){.view:not(.hidden){animation:none}}
+.pair{display:grid;gap:clamp(44px,6vw,72px);margin-top:clamp(44px,6vw,72px)}
+.pair .sec{margin-top:0}
+@media (min-width:760px){.pair{grid-template-columns:1fr 1fr}}
+.letter{padding-top:18px}
+.letter blockquote{font-size:clamp(1.25rem,2.2vw,1.55rem);font-weight:300;line-height:1.38;letter-spacing:-.01em}
+.letter .from{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:.9rem;color:var(--muted);font-weight:300}
+.letter .from b{color:var(--ink);font-weight:500}
+.av{width:30px;height:30px;border-radius:50%;background:var(--stone);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;letter-spacing:.04em;flex:none}
+
+.deltas{list-style:none}
+.deltas li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line)}
+.deltas .n{font-size:1rem;font-weight:300}
+.deltas .v{font-size:1.5rem;font-weight:700;letter-spacing:-.03em;white-space:nowrap}
+.deltas .v s{text-decoration:none;font-weight:300;color:var(--muted)}
+.deltas .v small{font-size:.85rem;font-weight:300;color:var(--muted);margin-left:2px}
+
+.talk{margin-top:clamp(44px,6vw,72px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;padding-top:24px;border-top:1px solid var(--line)}
+.talk p{font-size:1.15rem;font-weight:300;max-width:34ch}
+
+/* ===================== EXERCÍCIOS ===================== */
+.plan{margin-top:28px;max-width:62ch}
+.plan h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:500;letter-spacing:-.025em;line-height:1.15}
+.plan p{margin-top:10px;font-size:1.02rem;font-weight:300;color:var(--ink-soft)}
+.plan p b{font-weight:500;color:var(--ink)}
+.ex{display:grid;gap:22px;padding:clamp(28px,4vw,44px) 0;border-bottom:1px solid var(--line)}
+.ex:first-of-type{border-top:1px solid var(--line);margin-top:22px}
+@media (min-width:820px){.ex{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(28px,4vw,52px);align-items:start}}
+.vid{position:relative;aspect-ratio:16/10;border-radius:22px 22px 22px 4px;overflow:hidden;background:var(--stone) center/cover no-repeat;display:flex;align-items:center;justify-content:center;width:100%}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vid .play{width:68px;height:68px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center;transition:transform .45s var(--ease)}
+.vid:hover .play{transform:scale(1.08)}
+.vid .play svg{width:22px;height:22px;fill:var(--ink);margin-left:4px}
+.vid.none{flex-direction:column;gap:6px;color:var(--ink-soft);font-weight:300;font-size:.95rem}
+.vid.none b{font-weight:700;font-size:3.6rem;line-height:1;letter-spacing:-.05em;color:rgba(255,255,255,.75)}
+.ex-head{display:flex;gap:16px;align-items:baseline}
+.ex-head .no{font-size:2.6rem;font-weight:300;line-height:.9;letter-spacing:-.05em;color:var(--muted)}
+.ex-head h3{font-size:clamp(1.4rem,2.6vw,1.85rem);font-weight:500;letter-spacing:-.025em;line-height:1.12}
+.dose{margin-top:14px;font-size:1.1rem;font-weight:300;line-height:1.5}
+.dose b{font-weight:700}
+.ex p.how{margin-top:14px;font-weight:300;color:var(--ink-soft);max-width:52ch}
+.ex p.tipline{margin-top:10px;font-weight:300;color:var(--ink-soft);max-width:52ch}
+.ex p.tipline b{font-weight:500;color:var(--ink)}
+.ex p.mine{margin-top:12px;padding:12px 16px;background:var(--sheet);border-radius:14px 14px 14px 3px;font-weight:300;max-width:52ch}
+.ex p.mine b{font-weight:500}
+.ex .act{margin-top:22px;display:flex;align-items:center;gap:14px}
+.ex .act .btn.on{background:var(--ink);color:var(--white)}
+.ex .act span{font-size:.9rem;font-weight:300;color:var(--muted)}
+
+/* ===================== AVALIAÇÕES ===================== */
+.evo{display:grid;gap:0;margin-top:6px}
+@media (min-width:760px){.evo{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 36px}}
+.evo-i{padding:20px 0;border-bottom:1px solid var(--line)}
+.evo-i .n{font-size:.98rem;font-weight:300;color:var(--ink-soft)}
+.evo-i .v{margin-top:4px;font-size:2.4rem;font-weight:700;letter-spacing:-.045em;line-height:1}
+.evo-i .v s{text-decoration:none;font-weight:300;color:var(--muted)}
+.evo-i .v small{font-size:.95rem;font-weight:300;color:var(--muted);letter-spacing:0;margin-left:3px}
+.evo-i svg{display:block;width:100%;max-width:240px;height:42px;margin-top:12px}
+
+.tl{list-style:none;margin-top:8px}
+.tl li{display:grid;grid-template-columns:1fr;gap:6px;padding:28px 0;border-bottom:1px solid var(--line)}
+@media (min-width:760px){.tl li{grid-template-columns:150px 1fr;gap:32px}}
+.tl time{font-size:1rem;font-weight:300;color:var(--muted)}
+.tl time b{display:block;font-size:2rem;font-weight:700;letter-spacing:-.04em;color:var(--ink);line-height:1}
+.tl .kind{font-size:.92rem;font-weight:500;color:var(--ink-soft)}
+.tl h3{font-size:1.5rem;font-weight:500;letter-spacing:-.02em;line-height:1.2;margin-top:2px}
+.tl p{margin-top:10px;font-weight:300;max-width:58ch}
+.tl .nums{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:16px}
+.tl .nums div{font-size:.92rem;font-weight:300;color:var(--muted)}
+.tl .nums b{display:block;font-size:1.35rem;font-weight:700;letter-spacing:-.03em;color:var(--ink)}
+.tl .nums b small{font-size:.8rem;font-weight:300;color:var(--muted);margin-left:2px}
+.tl .btn{margin-top:18px}
+
+/* ===================== RECADOS ===================== */
+.msgs{list-style:none;margin-top:30px}
+.msgs li{display:grid;grid-template-columns:auto 1fr;gap:16px;padding:26px 0;border-bottom:1px solid var(--line)}
+.msgs li:first-child{border-top:1px solid var(--line)}
+.msgs .av{width:40px;height:40px;font-size:.78rem}
+.msgs .meta{font-size:.9rem;font-weight:300;color:var(--muted);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.msgs .meta b{font-weight:500;color:var(--ink)}
+.msgs .new{font-size:.78rem;font-weight:500;background:var(--ink);color:var(--white);padding:2px 10px;border-radius:999px}
+.msgs p{margin-top:8px;font-size:clamp(1.12rem,2vw,1.3rem);font-weight:300;line-height:1.45;white-space:pre-wrap;max-width:56ch}
+.msgs li.unread p{font-weight:400}
+
+/* ===================== AGENDA ===================== */
+.soon{margin-top:30px;padding:clamp(26px,4vw,44px);background:var(--sheet);border-radius:clamp(22px,3vw,40px) clamp(22px,3vw,40px) clamp(22px,3vw,40px) 6px;display:grid;gap:20px}
+@media (min-width:700px){.soon{grid-template-columns:auto 1fr;align-items:center;gap:40px}}
+.soon .big{font-weight:700;font-size:clamp(4.5rem,12vw,7rem);line-height:.8;letter-spacing:-.06em}
+.soon .big span{display:block;font-size:.3em;font-weight:300;letter-spacing:-.02em;margin-top:10px;color:var(--muted)}
+.soon h3{font-size:1.6rem;font-weight:500;letter-spacing:-.02em}
+.soon p{font-weight:300;color:var(--ink-soft);margin-top:4px}
+.soon .state{margin-top:10px;font-size:.92rem;font-weight:500}
+.alist{list-style:none}
+.alist li{display:grid;grid-template-columns:70px 1fr auto;gap:16px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+.alist .d{font-size:2rem;font-weight:700;letter-spacing:-.05em;line-height:.9}
+.alist .d small{display:block;font-size:.82rem;font-weight:300;letter-spacing:0;color:var(--muted);margin-top:4px}
+.alist h4{font-size:1.1rem;font-weight:500}
+.alist p{font-size:.92rem;font-weight:300;color:var(--muted)}
+.alist .st{font-size:.88rem;font-weight:300;color:var(--muted);text-align:right}
+.alist.past li{opacity:.6}
+
+/* ===================== MEUS DADOS ===================== */
+.form-block{max-width:520px;margin-top:30px}
+.form-block .field input{border-bottom-color:var(--line-2)}
+.form-block .field span{color:var(--muted)}
+.ro{margin-top:22px}
+.ro span{display:block;font-size:.84rem;color:var(--muted)}
+.ro p{font-size:1.15rem;padding:9px 0 10px;border-bottom:1px solid var(--line)}
+.inline{display:flex;gap:12px;align-items:flex-end}
+.inline .field{flex:1}
+.flash{margin-top:10px;font-size:.92rem;font-weight:300}
+
+.demo{display:inline-block;background:var(--ink);color:var(--white);font-size:.74rem;font-weight:500;padding:4px 12px;border-radius:999px;white-space:nowrap}
+.side .demo{margin-top:14px;align-self:flex-start}
+.mtop .demo{margin-left:auto;margin-right:10px}
+@media (max-width:599px){.routine .open{display:none}}
+.routine .nm button{font:inherit;text-align:left}
+.loader{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--stone);font-size:1.6rem;font-weight:300;color:var(--white);letter-spacing:-.02em}
+.toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(92px + var(--sb));background:var(--ink);color:var(--white);padding:12px 18px;border-radius:14px;font-size:.92rem;max-width:calc(100% - 32px)}
+.modal{position:fixed;inset:0;z-index:70;background:rgba(18,21,23,.45);display:flex;align-items:flex-end;justify-content:center}
+.modal-box{background:var(--paper);width:100%;max-width:580px;max-height:86vh;overflow:auto;border-radius:30px 30px 0 0;padding:30px 26px calc(26px + var(--sb))}
+@media (min-width:700px){.modal{align-items:center}.modal-box{border-radius:34px 34px 34px 6px}}
+.modal-box h3{font-size:1.9rem;font-weight:700;letter-spacing:-.035em;line-height:1;margin-bottom:18px}
+.modal-box p,.modal-box li{font-weight:300;color:var(--ink-soft);margin-bottom:10px}
+.modal-box b{font-weight:500;color:var(--ink)}
+.modal-box ul{padding-left:18px;margin-bottom:12px}
+
+/* um único movimento: a página entra quando você troca de seção */
+.view:not(.hidden){animation:enter .55s var(--ease)}
+@keyframes enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view:not(.hidden){animation:none}*{transition:none!important}}
 </style>
 </head>
 <body>
 
-<div id="demoBar" class="demo-bar hidden">Modo demonstração — dados fictícios</div>
 
-<!-- ================= AUTH ================= -->
+<!-- ===================== ENTRADA ===================== -->
 <section id="auth" class="auth hidden">
-  <div class="auth-card">
+  <div class="auth-top">
     <a class="brand" href="/">Isack Nícholas</a>
-    <h1>Área do<span>paciente</span></h1>
-    <p class="sub">Seus exercícios, avaliações e recados em um só lugar.</p>
+    <a class="back" href="/">Voltar ao site</a>
+  </div>
 
-    <div class="seg" id="authSeg">
-      <button data-auth="login" class="on">Entrar</button>
-      <button data-auth="first">Primeiro acesso</button>
+  <div class="auth-main">
+    <div>
+      <h1>Área do <span>paciente</span></h1>
+      <p class="lede">Seus exercícios, avaliações e recados do tratamento, sempre à mão.</p>
     </div>
 
-    <!-- login -->
-    <form id="fLogin">
-      <label for="lEmail">E-mail</label>
-      <input id="lEmail" type="email" autocomplete="email" required>
-      <label for="lPass">Senha</label>
-      <input id="lPass" type="password" autocomplete="current-password" required>
-      <button class="btn btn-primary" type="submit">Entrar</button>
-      <button class="link" type="button" data-auth="forgot">Esqueci minha senha</button>
-    </form>
-
-    <!-- primeiro acesso: passo 1 -->
-    <form id="fCode" class="hidden">
-      <label for="cCode">Código de acesso</label>
-      <input id="cCode" class="code" type="text" autocomplete="off" placeholder="XXXXXXXX" required>
-      <p class="muted" style="margin-top:8px">O código foi entregue pelo seu fisioterapeuta.</p>
-      <button class="btn btn-primary" type="submit">Continuar</button>
-    </form>
-
-    <!-- primeiro acesso: passo 2 -->
-    <form id="fSignup" class="hidden">
-      <div class="hello" id="helloName"></div>
-      <label for="sEmail">E-mail</label>
-      <input id="sEmail" type="email" autocomplete="email" required>
-      <label for="sTel">Telefone (WhatsApp)</label>
-      <input id="sTel" type="tel" autocomplete="tel" placeholder="(34) 9 0000-0000">
-      <label for="sPass">Crie uma senha</label>
-      <input id="sPass" type="password" autocomplete="new-password" minlength="8" required placeholder="mínimo 8 caracteres">
-      <label for="sPass2">Repita a senha</label>
-      <input id="sPass2" type="password" autocomplete="new-password" minlength="8" required>
-      <div class="check">
-        <input id="sTerms" type="checkbox" required>
-        <span>Li e concordo com o <a href="#" data-open="termos">termo de uso e privacidade</a> e autorizo o uso dos meus dados de saúde para o meu acompanhamento fisioterapêutico.</span>
+    <div class="auth-form">
+      <div class="switch" id="authSeg">
+        <button data-auth="login" class="on">Entrar</button>
+        <button data-auth="first">Primeiro acesso</button>
       </div>
-      <button class="btn btn-primary" type="submit">Criar meu acesso</button>
-      <button class="link" type="button" data-auth="first">Voltar</button>
-    </form>
 
-    <!-- esqueci -->
-    <form id="fForgot" class="hidden">
-      <label for="fEmail">E-mail cadastrado</label>
-      <input id="fEmail" type="email" autocomplete="email" required>
-      <button class="btn btn-primary" type="submit">Enviar link para redefinir</button>
-      <button class="link" type="button" data-auth="login">Voltar</button>
-    </form>
+      <form id="fLogin">
+        <label class="field"><span>E-mail</span><input id="lEmail" type="email" autocomplete="email" required></label>
+        <label class="field"><span>Senha</span><input id="lPass" type="password" autocomplete="current-password" required></label>
+        <button class="btn solid" type="submit">Entrar</button>
+        <div class="below"><button class="txt-link" type="button" data-auth="forgot">Esqueci minha senha</button></div>
+      </form>
 
-    <!-- nova senha (após link do e-mail) -->
-    <form id="fNewPass" class="hidden">
-      <label for="nPass">Nova senha</label>
-      <input id="nPass" type="password" autocomplete="new-password" minlength="8" required>
-      <button class="btn btn-primary" type="submit">Salvar nova senha</button>
-    </form>
+      <form id="fCode" class="hidden">
+        <label class="field"><span>Código de acesso</span><input id="cCode" class="code" type="text" autocomplete="off" placeholder="········" required></label>
+        <p class="hint">Você recebe o código do seu fisioterapeuta na primeira consulta.</p>
+        <button class="btn solid" type="submit">Continuar</button>
+      </form>
 
-    <div id="authMsg"></div>
-    <div class="auth-foot">
-      <a href="/">← Voltar ao site</a> · <a href="?demo">Ver demonstração</a>
+      <form id="fSignup" class="hidden">
+        <p class="hello" id="helloName"></p>
+        <label class="field"><span>E-mail</span><input id="sEmail" type="email" autocomplete="email" required></label>
+        <label class="field"><span>WhatsApp</span><input id="sTel" type="tel" autocomplete="tel" placeholder="(34) 9 0000-0000"></label>
+        <label class="field"><span>Crie uma senha</span><input id="sPass" type="password" autocomplete="new-password" minlength="8" required placeholder="Pelo menos 8 caracteres"></label>
+        <label class="field"><span>Repita a senha</span><input id="sPass2" type="password" autocomplete="new-password" minlength="8" required></label>
+        <label class="check"><input id="sTerms" type="checkbox" required>
+          <span>Li o <a href="#" class="txt-link" data-open="termos">termo de uso e privacidade</a> e autorizo o uso dos meus dados de saúde no meu acompanhamento.</span></label>
+        <button class="btn solid" type="submit">Criar meu acesso</button>
+        <div class="below"><button class="txt-link" type="button" data-auth="first">Usar outro código</button></div>
+      </form>
+
+      <form id="fForgot" class="hidden">
+        <p class="hello">Vamos criar uma nova senha.</p>
+        <label class="field"><span>E-mail do cadastro</span><input id="fEmail" type="email" autocomplete="email" required></label>
+        <button class="btn solid" type="submit">Enviar link por e-mail</button>
+        <div class="below"><button class="txt-link" type="button" data-auth="login">Voltar para entrar</button></div>
+      </form>
+
+      <form id="fNewPass" class="hidden">
+        <p class="hello">Escolha sua nova senha.</p>
+        <label class="field"><span>Nova senha</span><input id="nPass" type="password" autocomplete="new-password" minlength="8" required></label>
+        <button class="btn solid" type="submit">Salvar nova senha</button>
+      </form>
+
+      <div id="authMsg"></div>
     </div>
+  </div>
+
+  <div class="auth-foot">
+    <span>Fisioterapia ortopédica e esportiva em Uberlândia</span>
+    <a class="txt-link" href="?demo">Ver uma demonstração</a>
   </div>
 </section>
 
-<!-- ================= APP ================= -->
-<section id="app" class="hidden">
-  <header class="top">
-    <div class="top-in">
-      <a class="brand" href="/">Isack Nícholas</a>
-      <button class="avatar" id="avatarBtn" aria-label="Meu perfil">··</button>
-    </div>
-  </header>
+<!-- ===================== APP ===================== -->
+<section id="app" class="shell hidden">
+  <aside class="side">
+    <a class="brand" href="/">Isack Nícholas</a>
+    <nav id="sideNav">
+      <button data-v="inicio">Início</button>
+      <button data-v="exercicios">Exercícios</button>
+      <button data-v="avaliacoes">Avaliações</button>
+      <button data-v="recados">Recados</button>
+      <button data-v="agenda">Agenda</button>
+    </nav>
+    <div class="who" id="who"></div>
+  </aside>
 
-  <nav class="tabs" id="tabs">
-    <div class="tabs-in">
-      <button data-v="inicio" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Início</button>
-      <button data-v="exercicios"><svg viewBox="0 0 24 24"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg>Exercícios</button>
-      <button data-v="avaliacoes"><svg viewBox="0 0 24 24"><path d="M9 4h6v3H9zM7 5H5v16h14V5h-2M8 13l3 3 5-6"/></svg>Avaliações</button>
-      <button data-v="recados"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>Recados<span class="badge hidden" id="recBadge"></span></button>
-      <button data-v="agenda"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Agenda</button>
-    </div>
-  </nav>
+  <header class="mtop">
+    <a class="brand" href="/">Isack Nícholas</a>
+    <button class="me" id="avatarBtn" aria-label="Meus dados"></button>
+  </header>
 
   <main>
     <div class="view" id="v-inicio"></div>
@@ -284,24 +372,31 @@
     <div class="view hidden" id="v-agenda"></div>
     <div class="view hidden" id="v-perfil"></div>
   </main>
+
+  <nav class="dock" id="dock" aria-label="Seções">
+    <button data-v="inicio"><svg viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>Início</button>
+    <button data-v="exercicios"><svg viewBox="0 0 24 24"><path d="M6.5 8v8M3.5 10v4M17.5 8v8M20.5 10v4M6.5 12h11"/></svg>Treino</button>
+    <button data-v="avaliacoes"><svg viewBox="0 0 24 24"><path d="M4 19l5-6 4 3 7-9"/></svg>Evolução</button>
+    <button data-v="recados"><svg viewBox="0 0 24 24"><path d="M4.5 5.5h15v10h-9l-4.5 4v-4h-1.5z"/></svg>Recados</button>
+    <button data-v="agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></svg>Agenda</button>
+  </nav>
 </section>
 
-<div id="loader" class="loader">Carregando…</div>
+<div id="loader" class="loader">Um instante…</div>
 
-<!-- termo -->
 <div class="modal hidden" id="m-termos">
   <div class="modal-box">
     <h3>Termo de uso e privacidade</h3>
-    <p>Esta área é um canal de acompanhamento entre você e seu fisioterapeuta, Isack Nícholas (Uberlândia/MG).</p>
+    <p>Esta área é um canal de acompanhamento entre você e seu fisioterapeuta, Isack Nícholas (Uberlândia, MG).</p>
     <ul>
-      <li><b>Quais dados:</b> nome, e-mail, telefone, avaliações, prescrições de exercícios, recados e agendamentos.</li>
-      <li><b>Para quê:</b> exclusivamente para o seu acompanhamento fisioterapêutico.</li>
-      <li><b>Quem acessa:</b> apenas você e seu fisioterapeuta. Os dados não são vendidos nem compartilhados com terceiros.</li>
-      <li><b>Segurança:</b> acesso com senha pessoal; os dados ficam em servidor com criptografia, e cada paciente só vê as próprias informações.</li>
-      <li><b>Seus direitos (LGPD):</b> você pode pedir a qualquer momento acesso, correção ou exclusão dos seus dados pelo WhatsApp (34) 99139-6892 ou e-mail nicholasalmeida.ft@gmail.com.</li>
-      <li>Esta área não substitui o atendimento presencial. Em caso de dor intensa ou piora, entre em contato antes de continuar os exercícios.</li>
+      <li><b>Quais dados:</b> nome, e-mail, telefone, avaliações, exercícios prescritos, recados e horários.</li>
+      <li><b>Para quê:</b> somente para o seu acompanhamento fisioterapêutico.</li>
+      <li><b>Quem vê:</b> você e seu fisioterapeuta. Nada é vendido ou repassado a terceiros.</li>
+      <li><b>Segurança:</b> acesso com senha pessoal; cada paciente vê apenas as próprias informações.</li>
+      <li><b>Seus direitos (LGPD):</b> peça acesso, correção ou exclusão dos seus dados pelo WhatsApp (34) 99139-6892 ou pelo e-mail nicholasalmeida.ft@gmail.com.</li>
+      <li>Esta área não substitui o atendimento. Se a dor aumentar muito ou algo piorar, fale comigo antes de continuar os exercícios.</li>
     </ul>
-    <button class="btn btn-primary" data-close>Entendi</button>
+    <button class="btn solid" data-close>Fechar</button>
   </div>
 </div>
 
@@ -320,7 +415,6 @@ const todayISO = () => new Intl.DateTimeFormat('en-CA',{timeZone:TZ}).format(new
 const isoOf = d => new Intl.DateTimeFormat('en-CA',{timeZone:TZ}).format(d);
 const fmtDate = (d, o={day:'2-digit',month:'short',year:'numeric'}) => new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,...o}).format(typeof d==='string' && d.length===10 ? new Date(d+'T12:00:00-03:00') : new Date(d));
 const fmtTime = d => new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}).format(new Date(d));
-const TIPO = {inicial:['Avaliação inicial','blue'], evolucao:['Evolução mensal','ok'], reavaliacao:['Reavaliação','amber']};
 
 /* ================= API (real + demo) ================= */
 let sb = null;
@@ -398,7 +492,7 @@ function authMode(m) {
   $('#authSeg').classList.toggle('hidden', m==='forgot' || m==='newpass');
   msg('');
 }
-function msg(text, kind='err') { $('#authMsg').innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : ''; }
+function msg(text, kind='err') { $('#authMsg').innerHTML = text ? `<div class="note ${kind}">${esc(text)}</div>` : ''; }
 function busy(form, on) { const b = form.querySelector('button[type=submit]'); if (b) b.disabled = on; }
 function translateErr(e) {
   const m = (e && (e.message || e.error_description)) || String(e);
@@ -471,7 +565,7 @@ let recovering = false;
 function show(id) { ['auth','app','loader'].forEach(x => $('#'+x).classList.toggle('hidden', x!==id)); }
 
 async function start() {
-  if (DEMO) { $('#demoBar').classList.remove('hidden'); S = await api.loadAll(); return enterApp(); }
+  if (DEMO) { S = await api.loadAll(); return enterApp(); }
   const {data:{session}} = await sb.auth.getSession();
   if (!session) { show('auth'); authMode('login'); return; }
   if (recovering) { show('auth'); authMode('newpass'); return; }
@@ -486,7 +580,7 @@ async function start() {
     show('auth'); authMode('login');
     msg(eq ? 'Você entrou como fisioterapeuta. O painel do fisioterapeuta será a próxima etapa — por enquanto, use o modo demonstração para ver a área do paciente.'
            : 'Sua conta não está vinculada a um paciente. Fale com seu fisioterapeuta.', eq ? 'ok' : 'err');
-    $('#authMsg').insertAdjacentHTML('beforeend','<button class="link" id="outBtn">Sair</button>');
+    $('#authMsg').insertAdjacentHTML('beforeend','<button class="txt-link" id="outBtn" style="margin-top:14px">Sair</button>');
     $('#outBtn').onclick = () => sb.auth.signOut();
     return;
   }
@@ -503,195 +597,228 @@ if (!DEMO) {
   });
 }
 
+
 function enterApp() {
   show('app');
+  if (DEMO && !$('.demo')) { $('.side .brand').insertAdjacentHTML('afterend','<span class="demo">Demonstração</span>'); $('#avatarBtn').insertAdjacentHTML('beforebegin','<span class="demo">Demonstração</span>'); }
   const ini = S.paciente.nome.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
   $('#avatarBtn').textContent = ini;
+  $('#who').innerHTML = `<b>${esc(S.paciente.nome)}</b><button data-v="perfil">Meus dados</button><button id="sideOut">Sair</button>`;
+  $('#sideOut').onclick = logout;
   const h = location.hash.slice(1);
   go(['inicio','exercicios','avaliacoes','recados','agenda','perfil'].includes(h) ? h : 'inicio', false);
 }
+function logout() { DEMO ? (location.href = location.pathname) : sb.auth.signOut(); }
 
-/* ================= NAV ================= */
-$('#tabs').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (b) go(b.dataset.v); });
+/* ================= NAVEGAÇÃO ================= */
+document.addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b && S) { e.preventDefault(); go(b.dataset.v); } });
 $('#avatarBtn').addEventListener('click', () => go('perfil'));
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (S && h && h!==currentView && $('#v-'+h)) go(h,false); });
 
 function go(v, push=true) {
   currentView = v;
   $$('.view').forEach(x => x.classList.toggle('hidden', x.id !== 'v-'+v));
-  $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $$('#sideNav button, #dock button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   if (push) history.replaceState(null,'','#'+v);
   render[v]();
-  updateBadge();
+  marks();
   window.scrollTo({top:0});
 }
-
-function updateBadge() {
-  const n = S.recados.filter(r => !r.lido_em).length;
-  const b = $('#recBadge'); b.textContent = n; b.classList.toggle('hidden', !n);
+function marks() {
+  const n = S.recados.some(r => !r.lido_em);
+  $$('#sideNav [data-v=recados], #dock [data-v=recados]').forEach(b => {
+    let d = b.querySelector('.dot');
+    if (n && !d) { d = document.createElement('span'); d.className = 'dot'; d.setAttribute('aria-label','recado novo'); b.appendChild(d); }
+    if (!n && d) d.remove();
+  });
 }
 
-/* ================= HELPERS ================= */
-const allItems = () => S.prescricoes.flatMap(p => p.prescricao_itens);
+/* ================= AJUDANTES ================= */
+const items = () => S.prescricoes.flatMap(p => p.prescricao_itens);
 const doneToday = id => S.execucoes.some(x => x.item_id===id && x.data===todayISO());
-function weekStrip() {
-  const days = [];
-  for (let i=6;i>=0;i--) days.push(isoOf(new Date(Date.now()-i*864e5)));
-  const ids = new Set(allItems().map(i=>i.id));
-  const labels = ['dom','seg','ter','qua','qui','sex','sáb'];
-  return `<div class="week">${days.map(d => {
-    const done = S.execucoes.some(x => x.data===d && ids.has(x.item_id));
-    const dt = new Date(d+'T12:00:00-03:00');
-    return `<div class="day ${done?'done':''} ${d===todayISO()?'today':''}">${labels[dt.getDay()]}<div class="dot">${done?'✓':dt.getDate()}</div></div>`;
-  }).join('')}</div>`;
-}
-const nextAppt = () => S.agendamentos.find(a => new Date(a.inicio) > new Date() && a.status!=='cancelado');
 const waLink = t => `https://wa.me/${WHATS}?text=${encodeURIComponent(t)}`;
-const first = () => S.paciente.nome.split(' ')[0];
-function spark(vals) {
-  if (vals.length < 2) return '';
-  const min = Math.min(...vals), max = Math.max(...vals), r = (max-min)||1;
-  const pts = vals.map((v,i) => `${(i/(vals.length-1))*104+3},${31-((v-min)/r)*28}`).join(' ');
-  const last = pts.split(' ').pop().split(',');
-  return `<svg viewBox="0 0 110 34"><polyline points="${pts}" fill="none" stroke="#121517" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${last[0]}" cy="${last[1]}" r="3" fill="#121517"/></svg>`;
+const firstName = () => S.paciente.nome.split(' ')[0];
+const D = s => typeof s==='string' && s.length===10 ? new Date(s+'T12:00:00-03:00') : new Date(s);
+const fmt = (d,o) => new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,...o}).format(D(d));
+const hhmm = d => fmt(d,{hour:'2-digit',minute:'2-digit'}).replace(':','h');
+const weekday = d => fmt(d,{weekday:'long'}).replace('-feira','');
+const dayMonth = d => fmt(d,{day:'numeric',month:'long'});
+const shortMonth = d => fmt(d,{month:'short'}).replace('.','');
+function relDay(d) {
+  const a = isoOf(D(d)), t = todayISO(), y = isoOf(new Date(Date.now()-864e5)), tm = isoOf(new Date(Date.now()+864e5));
+  if (a===t) return 'hoje'; if (a===y) return 'ontem'; if (a===tm) return 'amanhã';
+  return `${weekday(d)}, ${dayMonth(d)}`;
 }
+function doseText(it) {
+  const p = [];
+  if (it.series && it.repeticoes) p.push(`<b>${esc(it.series)}</b> séries de <b>${esc(it.repeticoes)}</b>`);
+  else if (it.series) p.push(`<b>${esc(it.series)}</b> séries`);
+  else if (it.repeticoes) p.push(`<b>${esc(it.repeticoes)}</b>`);
+  if (it.carga) p.push(`carga ${esc(it.carga)}`);
+  if (it.descanso) p.push(`descanso de ${esc(it.descanso)}`);
+  if (it.frequencia) p.push(esc(it.frequencia));
+  return p.join(', ');
+}
+const plain = h => h.replace(/<[^>]+>/g,'');
+function weekStrip() {
+  const ids = new Set(items().map(i=>i.id)), out = [];
+  for (let i=6;i>=0;i--) {
+    const iso = isoOf(new Date(Date.now()-i*864e5)), dt = D(iso);
+    const done = S.execucoes.some(x => x.data===iso && ids.has(x.item_id));
+    out.push(`<div class="wd ${done?'done':''} ${i===0?'today':''}" title="${done?'Treinou':'Sem registro'}">${fmt(iso,{weekday:'short'}).replace('.','')}<i>${dt.getDate()}</i></div>`);
+  }
+  return `<div class="week" aria-label="Últimos 7 dias">${out.join('')}</div>`;
+}
+function metricSeries() {
+  const chron = [...S.avaliacoes].sort((a,b)=>a.data.localeCompare(b.data));
+  const names = [...new Set(chron.flatMap(a => (a.metricas||[]).map(m=>m.nome)))];
+  return names.map(n => {
+    const pts = chron.map(a => (a.metricas||[]).find(m=>m.nome===n)).filter(Boolean);
+    return {n, u:pts[0]?.unidade||'', vals:pts.map(p=>Number(p.valor)).filter(v=>!isNaN(v))};
+  }).filter(s => s.vals.length >= 2);
+}
+function spark(vals) {
+  const min = Math.min(...vals), max = Math.max(...vals), r = (max-min)||1, W=240, H=42;
+  const xy = vals.map((v,i) => [6+(i/(vals.length-1))*(W-12), H-6-((v-min)/r)*(H-12)]);
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${xy.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#121517" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>${xy.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===xy.length-1?4:2.5}" fill="${i===xy.length-1?'#121517':'#F1F2F0'}" stroke="#121517" stroke-width="1.5"/>`).join('')}</svg>`;
+}
+const tick = (id,on) => `<button class="tick ${on?'on':''}" data-done="${id}" aria-pressed="${on}" aria-label="${on?'Desmarcar':'Marcar como feito hoje'}"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></button>`;
+async function toggleDone(id) {
+  const on = !doneToday(id), d = todayISO();
+  try {
+    await api.setDone(id, on);
+    if (on) S.execucoes.push({item_id:id, data:d}); else S.execucoes = S.execucoes.filter(x => !(x.item_id===id && x.data===d));
+    render[currentView]();
+  } catch { toast('Não deu para salvar. Confira sua internet e tente de novo.'); }
+}
+function bindTicks(root) { root.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () => { b.disabled = true; toggleDone(b.dataset.done); })); }
+function toast(t) { const d = document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),3600); }
+const TIPO = {inicial:'Avaliação inicial', evolucao:'Evolução mensal', reavaliacao:'Reavaliação'};
 
-/* ================= VIEWS ================= */
+/* ================= TELAS ================= */
 const render = {
   inicio() {
-    const n = nextAppt(), unread = S.recados.filter(r=>!r.lido_em), items = allItems(), lastAv = S.avaliacoes[0];
-    const doneN = items.filter(i => doneToday(i.id)).length;
-    const hour = Number(new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'numeric',hour12:false}).format(new Date()));
-    const greet = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
-    $('#v-inicio').innerHTML = `
-      <div class="eyebrow">Área do paciente</div>
-      <h2>${greet},<br><span>${esc(first())}</span></h2>
-      <p class="lead">Aqui está o resumo do seu acompanhamento.</p>
-
-      <div class="card home-hero clickable" onclick="go('agenda')">
-        <div class="lbl">Próximo atendimento</div>
-        ${n ? `<div class="big-date">${esc(fmtDate(n.inicio,{weekday:'long',day:'2-digit',month:'long'}))}<br><span>${fmtTime(n.inicio)}</span></div>
-               <div class="muted" style="margin-top:4px">${esc(n.tipo||'Atendimento')} — ${esc(n.local||'')}</div>`
-            : `<div class="big-date">Nenhum horário marcado</div><div class="muted" style="margin-top:4px">Fale comigo no WhatsApp para agendar.</div>`}
-      </div>
-
-      <div class="grid2">
-        <div class="card clickable" onclick="go('exercicios')">
-          <div class="row"><h3>Exercícios de hoje</h3><span class="pill ${doneN && doneN===items.length?'ok':''}">${doneN}/${items.length}</span></div>
-          <p class="muted" style="margin-top:4px">${items.length ? esc(S.prescricoes[0].titulo) : 'Nenhuma prescrição ativa ainda.'}</p>
-          ${items.length ? weekStrip() : ''}
+    const n = S.agendamentos.find(a => new Date(a.inicio) > new Date() && a.status!=='cancelado');
+    const its = items(), doneN = its.filter(i=>doneToday(i.id)).length, rec = S.recados[0], ser = metricSeries();
+    const h = Number(new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'numeric',hour12:false}).format(new Date()));
+    const greet = h < 12 ? 'Bom dia,' : h < 18 ? 'Boa tarde,' : 'Boa noite,';
+    const el = $('#v-inicio');
+    el.innerHTML = `
+      <section class="hero">
+        <h1>${greet}<span>${esc(firstName())}</span></h1>
+        <div class="next">
+          ${n ? `<p>Sua próxima ${esc((n.tipo||'sessão').toLowerCase())} é <b>${relDay(n.inicio)}</b>, às <b>${hhmm(n.inicio)}</b>.<small>${esc(n.local||'')}</small></p>
+                 <button class="btn sm" data-v="agenda">Ver agenda</button>`
+              : `<p>Você não tem horário marcado.<small>Me chame no WhatsApp para agendar.</small></p>
+                 <a class="btn sm" href="${waLink('Olá, Isack! Quero agendar um horário.')}" target="_blank" rel="noopener">Agendar</a>`}
         </div>
-        <div class="card clickable" onclick="go('recados')">
-          <div class="row"><h3>Recados</h3>${unread.length?`<span class="pill amber">${unread.length} novo${unread.length>1?'s':''}</span>`:''}</div>
-          <p class="muted" style="margin-top:6px">${S.recados[0] ? esc(S.recados[0].texto.slice(0,120)) + (S.recados[0].texto.length>120?'…':'') : 'Nenhum recado por enquanto.'}</p>
-        </div>
+      </section>
+
+      <section class="sec">
+        <div class="sec-h"><h2>Treino de hoje</h2><span class="aside">${its.length ? `${doneN} de ${its.length} feitos` : ''}</span></div>
+        ${its.length ? `${weekStrip()}
+          <ul class="routine">${its.map(it => { const on = doneToday(it.id); return `
+            <li class="${on?'is-done':''}">${tick(it.id,on)}
+              <div><div class="nm"><button data-v="exercicios">${esc(it.exercicios?.nome)}</button></div><div class="ds">${plain(doseText(it))}</div></div>
+              <button class="open" data-v="exercicios">Ver vídeo</button></li>`; }).join('')}</ul>`
+          : `<p class="empty">Seus exercícios aparecem aqui depois da avaliação.</p>`}
+      </section>
+
+      <div class="pair">
+        <section class="sec">
+          <div class="sec-h"><h2>Último recado</h2>${S.recados.length>1?`<button class="more" data-v="recados">Ver todos</button>`:''}</div>
+          ${rec ? `<div class="letter"><blockquote>${esc(rec.texto)}</blockquote>
+              <div class="from"><span class="av">IN</span><span><b>Isack</b>, ${relDay(rec.criado_em)}</span></div></div>`
+            : `<p class="empty">Quando eu deixar uma orientação, ela aparece aqui.</p>`}
+        </section>
+        <section class="sec">
+          <div class="sec-h"><h2>Sua evolução</h2>${S.avaliacoes.length?`<button class="more" data-v="avaliacoes">Avaliações</button>`:''}</div>
+          ${ser.length ? `<ul class="deltas">${ser.slice(0,3).map(s => `<li><span class="n">${esc(s.n)}</span>
+              <span class="v"><s>${s.vals[0]} →</s> ${s.vals[s.vals.length-1]}<small>${esc(s.u)}</small></span></li>`).join('')}</ul>
+              <p class="muted" style="margin-top:12px;font-size:.9rem">Da primeira avaliação até a mais recente.</p>`
+            : `<p class="empty">A comparação aparece a partir da sua segunda avaliação.</p>`}
+        </section>
       </div>
 
-      <div class="card clickable" onclick="go('avaliacoes')">
-        <div class="row"><h3>Última avaliação</h3>${lastAv?`<span class="pill ${TIPO[lastAv.tipo][1]}">${TIPO[lastAv.tipo][0]}</span>`:''}</div>
-        ${lastAv ? `<p class="muted" style="margin-top:4px">${esc(fmtDate(lastAv.data))} · ${esc(lastAv.titulo)}</p>
-          <div class="metrics">${(lastAv.metricas||[]).slice(0,3).map(m=>`<div class="metric"><div class="n">${esc(m.nome)}</div><div class="v">${esc(m.valor)}<small>${esc(m.unidade||'')}</small></div></div>`).join('')}</div>`
-          : `<p class="muted" style="margin-top:4px">Suas avaliações aparecem aqui quando forem liberadas.</p>`}
-      </div>
-
-      <a class="btn wide" href="${waLink('Olá, Isack! Sou '+S.paciente.nome+' e tenho uma dúvida.')}" target="_blank" rel="noopener">Falar no WhatsApp</a>`;
+      <div class="talk">
+        <p>Dúvida sobre algum exercício ou sentiu algo diferente?</p>
+        <a class="btn" href="${waLink('Olá, Isack! Sou '+S.paciente.nome+' e tenho uma dúvida.')}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+      </div>`;
+    bindTicks(el);
   },
 
   exercicios() {
     const el = $('#v-exercicios');
-    if (!S.prescricoes.length) { el.innerHTML = `<h2>Seus <span>exercícios</span></h2><div class="card empty">Você ainda não tem exercícios prescritos.<br>Eles aparecem aqui depois da sua avaliação.</div>`; return; }
-    el.innerHTML = `<h2>Seus <span>exercícios</span></h2><p class="lead">Marque cada exercício quando terminar. Isso me ajuda a acompanhar sua evolução.</p>` +
+    if (!S.prescricoes.length) { el.innerHTML = `<h1 class="page-h">Exercícios</h1><p class="empty">Você ainda não tem exercícios. Eles aparecem aqui depois da sua avaliação.</p>`; return; }
+    el.innerHTML = `<h1 class="page-h">Seus <span>exercícios</span></h1>
+      <p class="page-lede">Assista ao vídeo, faça na ordem e marque quando terminar. Assim eu acompanho sua semana.</p>` +
       S.prescricoes.map(p => `
-        <div class="card">
-          <div class="eyebrow">Prescrição atual</div>
-          <h3>${esc(p.titulo)}</h3>
-          ${p.objetivo ? `<p class="muted" style="margin-top:4px"><b>Objetivo:</b> ${esc(p.objetivo)}</p>` : ''}
-          ${p.observacoes ? `<p class="tip">${esc(p.observacoes)}</p>` : ''}
+        <div class="plan">
+          <h2>${esc(p.titulo)}</h2>
+          ${p.objetivo ? `<p><b>Objetivo:</b> ${esc(p.objetivo)}</p>` : ''}
+          ${p.observacoes ? `<p>${esc(p.observacoes)}</p>` : ''}
           ${weekStrip()}
         </div>
-        <div class="ex-list">${p.prescricao_itens.map((it,idx) => {
-          const e = it.exercicios || {}, on = doneToday(it.id);
-          const thumb = e.youtube_id ? `style="background-image:url('https://i.ytimg.com/vi/${encodeURIComponent(e.youtube_id)}/hqdefault.jpg')"` : '';
-          return `<div class="card ex">
+        ${p.prescricao_itens.map((it,i) => { const e = it.exercicios||{}, on = doneToday(it.id); return `
+          <article class="ex">
             ${e.youtube_id
-              ? `<button class="ex-video" ${thumb} data-yt="${esc(e.youtube_id)}" aria-label="Assistir vídeo"><span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></button>`
-              : `<div class="ex-video none">Vídeo em breve</div>`}
-            <div class="ex-body">
-              <div class="ex-num">${String(idx+1).padStart(2,'0')}${e.codigo?' · '+esc(e.codigo):''}</div>
-              <h3>${esc(e.nome)}</h3>
-              <div class="dose">
-                ${it.series?`<div>Séries<b>${esc(it.series)}</b></div>`:''}
-                ${it.repeticoes?`<div>Repetições<b>${esc(it.repeticoes)}</b></div>`:''}
-                ${it.carga?`<div>Carga<b>${esc(it.carga)}</b></div>`:''}
-                ${it.descanso?`<div>Descanso<b>${esc(it.descanso)}</b></div>`:''}
-                ${it.frequencia?`<div>Frequência<b>${esc(it.frequencia)}</b></div>`:''}
-              </div>
-              ${e.descricao?`<p class="muted">${esc(e.descricao)}</p>`:''}
-              ${e.dicas?`<p class="tip">${esc(e.dicas)}</p>`:''}
-              ${it.observacoes?`<p class="tip"><b>Para você:</b> ${esc(it.observacoes)}</p>`:''}
-              <button class="btn done-btn ${on?'on':''}" data-done="${it.id}">${on?'✓ Feito hoje':'Marcar como feito hoje'}</button>
+              ? `<button class="vid" style="background-image:url('https://i.ytimg.com/vi/${encodeURIComponent(e.youtube_id)}/hqdefault.jpg')" data-yt="${esc(e.youtube_id)}" aria-label="Assistir ao vídeo de ${esc(e.nome)}"><span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></button>`
+              : `<div class="vid none"><b>${i+1}</b>O vídeo deste exercício chega em breve</div>`}
+            <div>
+              <div class="ex-head"><span class="no">${i+1}</span><h3>${esc(e.nome)}</h3></div>
+              <p class="dose">${doseText(it)}.</p>
+              ${e.descricao ? `<p class="how">${esc(e.descricao)}</p>` : ''}
+              ${e.dicas ? `<p class="tipline"><b>Atenção:</b> ${esc(e.dicas)}</p>` : ''}
+              ${it.observacoes ? `<p class="mine"><b>Só para você:</b> ${esc(it.observacoes)}</p>` : ''}
+              <div class="act"><button class="btn ${on?'on':''}" data-done="${it.id}" aria-pressed="${on}">${on?'Feito hoje':'Marcar como feito'}</button>${on?'<span>Toque de novo para desmarcar</span>':''}</div>
             </div>
-          </div>`;
-        }).join('')}</div>`).join('');
-
+          </article>`; }).join('')}`).join('');
     el.querySelectorAll('[data-yt]').forEach(b => b.addEventListener('click', () => {
       b.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(b.dataset.yt)}?autoplay=1&rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Vídeo do exercício"></iframe>`;
     }, {once:true}));
-    el.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', async () => {
-      const id = b.dataset.done, on = !doneToday(id), d = todayISO();
-      b.disabled = true;
-      try {
-        await api.setDone(id, on);
-        if (on) S.execucoes.push({item_id:id, data:d}); else S.execucoes = S.execucoes.filter(x => !(x.item_id===id && x.data===d));
-        render.exercicios();
-      } catch (err) { b.disabled = false; alertBox('Não foi possível salvar. Verifique sua conexão.'); }
-    }));
+    bindTicks(el);
   },
 
   avaliacoes() {
-    const el = $('#v-avaliacoes'), av = S.avaliacoes;
-    if (!av.length) { el.innerHTML = `<h2>Suas <span>avaliações</span></h2><div class="card empty">Suas avaliações aparecem aqui assim que forem liberadas.</div>`; return; }
-    // evolução por métrica (ordem cronológica)
-    const chron = [...av].sort((a,b)=>a.data.localeCompare(b.data));
-    const names = [...new Set(chron.flatMap(a => (a.metricas||[]).map(m=>m.nome)))];
-    const series = names.map(n => {
-      const pts = chron.map(a => (a.metricas||[]).find(m=>m.nome===n)).filter(Boolean);
-      return {n, u:pts[0]?.unidade||'', vals:pts.map(p=>Number(p.valor)).filter(v=>!isNaN(v))};
-    }).filter(s => s.vals.length >= 2);
-
-    el.innerHTML = `<h2>Suas <span>avaliações</span></h2><p class="lead">Avaliações de evolução e reavaliações liberadas pelo seu fisioterapeuta.</p>
-      ${series.length ? `<div class="card"><h3>Sua evolução</h3><p class="muted">Da primeira à última avaliação</p>
-        <div class="evo" style="margin-top:8px">${series.map(s => `<div class="evo-row"><div><div class="muted">${esc(s.n)}</div>
-          <div class="val">${s.vals[0]} <span>→</span> ${s.vals[s.vals.length-1]} <small class="muted">${esc(s.u)}</small></div></div>${spark(s.vals)}</div>`).join('')}</div></div>` : ''}
-      ${av.map(a => `<div class="card">
-        <div class="row"><span class="pill ${TIPO[a.tipo][1]}">${TIPO[a.tipo][0]}</span><span class="muted">${esc(fmtDate(a.data))}</span></div>
-        <h3 style="margin-top:10px">${esc(a.titulo)}</h3>
-        ${a.regiao?`<p class="muted">${esc(a.regiao)}</p>`:''}
-        ${a.resumo?`<p style="margin-top:8px">${esc(a.resumo)}</p>`:''}
-        ${(a.metricas||[]).length?`<div class="metrics">${a.metricas.map(m=>`<div class="metric"><div class="n">${esc(m.nome)}</div><div class="v">${esc(m.valor)}<small>${esc(m.unidade||'')}</small></div></div>`).join('')}</div>`:''}
-        ${a.arquivo_path?`<button class="btn btn-ghost btn-sm" style="margin-top:14px" data-pdf="${esc(a.arquivo_path)}">Abrir relatório (PDF)</button>`:''}
-      </div>`).join('')}`;
+    const el = $('#v-avaliacoes'), av = S.avaliacoes, ser = metricSeries();
+    if (!av.length) { el.innerHTML = `<h1 class="page-h">Avaliações</h1><p class="empty">Suas avaliações aparecem aqui assim que eu liberar.</p>`; return; }
+    el.innerHTML = `<h1 class="page-h">Sua <span>evolução</span></h1>
+      <p class="page-lede">Avaliações mensais de evolução e reavaliações, liberadas depois de cada consulta.</p>
+      ${ser.length ? `<section class="sec"><div class="sec-h"><h2>Comparando</h2><span class="aside">primeira → mais recente</span></div>
+        <div class="evo">${ser.map(s => `<div class="evo-i"><div class="n">${esc(s.n)}</div>
+          <div class="v"><s>${s.vals[0]} →</s> ${s.vals[s.vals.length-1]}<small>${esc(s.u)}</small></div>${spark(s.vals)}</div>`).join('')}</div></section>` : ''}
+      <section class="sec"><div class="sec-h"><h2>Histórico</h2><span class="aside">${av.length} ${av.length>1?'avaliações':'avaliação'}</span></div>
+        <ol class="tl">${av.map(a => `<li>
+          <time datetime="${esc(a.data)}"><b>${fmt(a.data,{day:'numeric'})} ${shortMonth(a.data)}</b>${fmt(a.data,{year:'numeric'})}</time>
+          <div>
+            <div class="kind">${TIPO[a.tipo]||''}${a.regiao?`, ${esc(a.regiao.toLowerCase())}`:''}</div>
+            <h3>${esc(a.titulo)}</h3>
+            ${a.resumo ? `<p>${esc(a.resumo)}</p>` : ''}
+            ${(a.metricas||[]).length ? `<div class="nums">${a.metricas.map(m=>`<div>${esc(m.nome)}<b>${esc(m.valor)}<small>${esc(m.unidade||'')}</small></b></div>`).join('')}</div>` : ''}
+            ${a.arquivo_path ? `<button class="btn sm" data-pdf="${esc(a.arquivo_path)}">Abrir relatório em PDF</button>` : ''}
+          </div></li>`).join('')}</ol></section>`;
     el.querySelectorAll('[data-pdf]').forEach(b => b.addEventListener('click', async () => {
       const w = window.open('', '_blank');
       try { const url = await api.pdfUrl(b.dataset.pdf); if (url) w.location = url; else w.close(); }
-      catch { w.close(); alertBox('Não foi possível abrir o arquivo agora.'); }
+      catch { w.close(); toast('Não deu para abrir o relatório agora. Tente de novo em instantes.'); }
     }));
   },
 
   recados() {
     const el = $('#v-recados');
-    el.innerHTML = `<h2>Recados</h2><p class="lead">Orientações e avisos do seu fisioterapeuta.</p>` +
-      (S.recados.length ? S.recados.map(r => `<div class="card recado ${r.lido_em?'':'novo'}">
-          <div class="muted" style="margin-bottom:6px">${esc(fmtDate(r.criado_em,{day:'2-digit',month:'short'}))} · ${fmtTime(r.criado_em)}</div>
-          <p>${esc(r.texto)}</p></div>`).join('')
-        : `<div class="card empty">Nenhum recado por enquanto.</div>`) +
-      `<a class="btn wide" href="${waLink('Olá, Isack! Sobre o recado na área do paciente: ')}" target="_blank" rel="noopener">Responder pelo WhatsApp</a>`;
-    // marca como lidos ao abrir
+    el.innerHTML = `<h1 class="page-h">Recados</h1>
+      <p class="page-lede">Orientações que deixo entre uma consulta e outra.</p>
+      ${S.recados.length ? `<ul class="msgs">${S.recados.map(r => `<li class="${r.lido_em?'':'unread'}">
+          <span class="av">IN</span>
+          <div><div class="meta"><b>Isack</b><span>${relDay(r.criado_em)}, ${hhmm(r.criado_em)}</span>${r.lido_em?'':'<span class="new">novo</span>'}</div>
+          <p>${esc(r.texto)}</p></div></li>`).join('')}</ul>`
+        : `<p class="empty">Nenhum recado por enquanto.</p>`}
+      <div class="talk"><p>Quer responder ou tirar uma dúvida?</p>
+        <a class="btn" href="${waLink('Olá, Isack! Sobre o recado na área do paciente: ')}" target="_blank" rel="noopener">Responder no WhatsApp</a></div>`;
     const unread = S.recados.filter(r => !r.lido_em);
     if (unread.length) {
       Promise.all(unread.map(r => api.markRead(r.id))).catch(()=>{});
-      const now = new Date().toISOString(); unread.forEach(r => r.lido_em = now);
-      setTimeout(updateBadge, 0);
+      setTimeout(() => { const now = new Date().toISOString(); unread.forEach(r => r.lido_em = now); marks(); }, 1200);
     }
   },
 
@@ -699,55 +826,54 @@ const render = {
     const el = $('#v-agenda'), now = new Date();
     const fut = S.agendamentos.filter(a => new Date(a.inicio) >= now);
     const past = S.agendamentos.filter(a => new Date(a.inicio) < now).reverse().slice(0,10);
-    const ST = {agendado:['Agendado',''],confirmado:['Confirmado','ok'],realizado:['Realizado',''],cancelado:['Cancelado','amber'],faltou:['Falta','amber']};
-    const item = (a, cls='') => `<div class="card ag ${cls}">
-      <div class="ag-date"><div class="d">${fmtDate(a.inicio,{day:'2-digit'})}</div><div class="m">${fmtDate(a.inicio,{month:'short'}).replace('.','')}</div></div>
-      <div style="flex:1;min-width:0"><div class="row"><h3>${esc(a.tipo||'Atendimento')}</h3><span class="pill ${ST[a.status]?.[1]||''}">${ST[a.status]?.[0]||esc(a.status)}</span></div>
-      <p class="muted">${esc(fmtDate(a.inicio,{weekday:'long'}))} · ${fmtTime(a.inicio)}${a.fim?' – '+fmtTime(a.fim):''}</p>
-      ${a.local?`<p class="muted">${esc(a.local)}</p>`:''}</div></div>`;
-    el.innerHTML = `<h2>Sua <span>agenda</span></h2><p class="lead">Seus horários marcados.</p>
-      ${fut.length ? fut.map(a=>item(a)).join('') : `<div class="card empty">Nenhum horário futuro marcado.</div>`}
-      <a class="btn wide" href="${waLink('Olá, Isack! Gostaria de agendar/remarcar um horário.')}" target="_blank" rel="noopener">Agendar ou remarcar pelo WhatsApp</a>
-      ${past.length ? `<div class="section-t">Anteriores</div>${past.map(a=>item(a,'past')).join('')}` : ''}`;
+    const ST = {agendado:'Agendado', confirmado:'Confirmado', realizado:'Realizado', cancelado:'Cancelado', faltou:'Falta'};
+    const [n, ...rest] = fut;
+    const row = a => `<li><div class="d">${fmt(a.inicio,{day:'numeric'})}<small>${shortMonth(a.inicio)}</small></div>
+        <div><h4>${esc(a.tipo||'Atendimento')}</h4><p>${weekday(a.inicio)}, ${hhmm(a.inicio)}${a.fim?` às ${hhmm(a.fim)}`:''}</p></div>
+        <div class="st">${ST[a.status]||esc(a.status)}</div></li>`;
+    el.innerHTML = `<h1 class="page-h">Sua <span>agenda</span></h1>
+      ${n ? `<div class="soon"><div class="big">${fmt(n.inicio,{day:'numeric'})}<span>${fmt(n.inicio,{month:'long'})}</span></div>
+          <div><h3>${esc(n.tipo||'Atendimento')}</h3>
+          <p>${weekday(n.inicio)}${['hoje','amanhã'].includes(relDay(n.inicio))?` (${relDay(n.inicio)})`:''}, das ${hhmm(n.inicio)}${n.fim?` às ${hhmm(n.fim)}`:''}</p>${n.local?`<p>${esc(n.local)}</p>`:''}
+          <p class="state">${ST[n.status]||''}</p></div></div>`
+        : `<p class="empty">Você não tem horário marcado.</p>`}
+      ${rest.length ? `<section class="sec"><div class="sec-h"><h2>Depois</h2></div><ul class="alist">${rest.map(row).join('')}</ul></section>` : ''}
+      <div class="talk"><p>Precisa marcar, trocar ou cancelar um horário?</p>
+        <a class="btn" href="${waLink('Olá, Isack! Preciso marcar ou remarcar um horário.')}" target="_blank" rel="noopener">Combinar no WhatsApp</a></div>
+      ${past.length ? `<section class="sec"><div class="sec-h"><h2>Anteriores</h2></div><ul class="alist past">${past.map(row).join('')}</ul></section>` : ''}`;
   },
 
   perfil() {
     const p = S.paciente;
-    $('#v-perfil').innerHTML = `<h2>Meus <span>dados</span></h2><p class="lead">Mantenha seu telefone atualizado.</p>
-      <div class="card">
-        <label>Nome</label><p>${esc(p.nome)}</p>
-        <label>E-mail</label><p>${esc(p.email||'—')}</p>
-        <form id="fTel"><label for="pTel">Telefone (WhatsApp)</label>
-          <div class="row"><input id="pTel" type="tel" value="${esc(p.telefone||'')}"><button class="btn btn-ghost btn-sm" type="submit">Salvar</button></div></form>
-        <div id="telMsg"></div>
+    $('#v-perfil').innerHTML = `<h1 class="page-h">Meus <span>dados</span></h1>
+      <div class="form-block">
+        <div class="ro"><span>Nome</span><p>${esc(p.nome)}</p></div>
+        <div class="ro"><span>E-mail</span><p>${esc(p.email||'Não informado')}</p></div>
+        <form id="fTel" class="inline"><label class="field"><span>WhatsApp</span><input id="pTel" type="tel" value="${esc(p.telefone||'')}"></label><button class="btn sm" type="submit">Salvar</button></form>
+        <div id="telMsg" class="flash"></div>
       </div>
-      <div class="card">
-        <form id="fPass"><h3>Alterar senha</h3>
-          <label for="pPass">Nova senha</label><input id="pPass" type="password" minlength="8" autocomplete="new-password" required>
-          <button class="btn btn-ghost btn-sm" style="margin-top:12px" type="submit">Alterar senha</button></form>
-        <div id="passMsg"></div>
-      </div>
-      <p class="muted" style="margin:6px 0 18px"><a href="#" data-open="termos">Termo de uso e privacidade</a> · Para pedir a exclusão dos seus dados, fale comigo pelo WhatsApp.</p>
-      <button class="btn wide" id="logout">${DEMO?'Sair da demonstração':'Sair'}</button>`;
+      <section class="sec form-block">
+        <div class="sec-h"><h2>Senha</h2></div>
+        <form id="fPass" class="inline"><label class="field"><span>Nova senha</span><input id="pPass" type="password" minlength="8" autocomplete="new-password" required></label><button class="btn sm" type="submit">Trocar</button></form>
+        <div id="passMsg" class="flash"></div>
+      </section>
+      <section class="sec form-block">
+        <p class="muted">Seus dados são usados só no seu acompanhamento. <a href="#" class="txt-link" data-open="termos">Leia o termo de privacidade</a>. Para pedir a exclusão, fale comigo no WhatsApp.</p>
+        <button class="btn" style="margin-top:24px" id="logout">${DEMO?'Sair da demonstração':'Sair da conta'}</button>
+      </section>`;
     $('#fTel').addEventListener('submit', async e => {
       e.preventDefault(); const t = $('#pTel').value.trim();
-      try { await api.updatePhone(t); p.telefone = t; $('#telMsg').innerHTML = '<div class="msg ok">Telefone atualizado.</div>'; }
-      catch { $('#telMsg').innerHTML = '<div class="msg err">Não foi possível salvar.</div>'; }
+      try { await api.updatePhone(t); p.telefone = t; $('#telMsg').textContent = 'WhatsApp salvo.'; }
+      catch { $('#telMsg').textContent = 'Não deu para salvar. Tente de novo.'; }
     });
     $('#fPass').addEventListener('submit', async e => {
-      e.preventDefault(); if (DEMO) return;
+      e.preventDefault(); if (DEMO) { $('#passMsg').textContent = 'Na demonstração a senha não muda.'; return; }
       const {error} = await sb.auth.updateUser({password:$('#pPass').value});
-      $('#passMsg').innerHTML = error ? `<div class="msg err">${esc(translateErr(error))}</div>` : '<div class="msg ok">Senha alterada.</div>';
+      $('#passMsg').textContent = error ? translateErr(error) : 'Senha trocada.';
     });
-    $('#logout').onclick = () => DEMO ? (location.href = location.pathname) : sb.auth.signOut();
+    $('#logout').onclick = logout;
   }
 };
-
-function alertBox(t) {
-  const d = document.createElement('div'); d.className = 'msg err';
-  d.style.cssText = 'position:fixed;left:16px;right:16px;bottom:calc(84px + var(--safe-b));z-index:60;max-width:520px;margin:0 auto';
-  d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 3500);
-}
 
 if (DEMO) start();
 </script>
