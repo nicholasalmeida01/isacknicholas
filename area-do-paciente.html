@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Área do Paciente — Isack Nícholas Fisioterapia</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F1F2F0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @font-face{font-family:'Kaluk Sans';src:url(/fonts/kaluk-sans-300.woff2) format('woff2');font-weight:300;font-display:swap}
+  @font-face{font-family:'Kaluk Sans';src:url(/fonts/kaluk-sans-400.woff2) format('woff2');font-weight:400;font-display:swap}
+  @font-face{font-family:'Kaluk Sans';src:url(/fonts/kaluk-sans-500.woff2) format('woff2');font-weight:500;font-display:swap}
+  @font-face{font-family:'Kaluk Sans';src:url(/fonts/kaluk-sans-700.woff2) format('woff2');font-weight:700;font-display:swap}
+  /* Mesma identidade da nova home: cinza da foto, papel claro, tinta quase preta, Kaluk Sans */
+  :root{
+    --stone:#8D9397; --stone-deep:#7F868A; --paper:#F1F2F0; --card:#FAFAF8; --white:#fff;
+    --ink:#121517; --ink-soft:#2C3235; --muted:#5E666A; --line:rgba(18,21,23,.14); --line-strong:rgba(18,21,23,.35);
+    --ok:#2F6B4A; --ok-bg:#E3ECE6; --warn:#7A4A2A; --warn-bg:#EFE6DF;
+    --font:'Kaluk Sans','Futura','Century Gothic',system-ui,sans-serif;
+    --radius:clamp(18px,2vw,26px); --ease:cubic-bezier(.2,.7,.1,1);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow-x:hidden}
+  body{font-family:var(--font);background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
+  a{color:inherit}
+  button{font:inherit;cursor:pointer;color:inherit}
+  .hidden{display:none!important}
+  .brand{font-weight:700;font-size:.95rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;text-decoration:none}
+  .brand span{color:inherit}
+  .eyebrow{font-size:.7rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .eyebrow::before{content:"";width:30px;height:1.5px;background:currentColor}
+
+  /* ---------- Auth (tela cinza da home) ---------- */
+  .auth{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:var(--stone)}
+  .auth-card{width:100%;max-width:420px;background:var(--paper);border-radius:var(--radius);padding:clamp(28px,4vw,40px);box-shadow:0 24px 60px rgba(18,21,23,.14)}
+  .auth h1{font-size:clamp(2.2rem,8vw,2.9rem);font-weight:700;line-height:.95;letter-spacing:-.04em;margin:30px 0 12px}
+  .auth h1 span{display:block;font-weight:300}
+  .auth p.sub{color:var(--muted);margin-bottom:26px;font-weight:300}
+  .seg{display:flex;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .seg button{flex:1;border:0;background:transparent;padding:12px 4px;font-size:.74rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);position:relative}
+  .seg button.on{color:var(--ink);font-weight:700}
+  .seg button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1.5px;background:var(--ink)}
+  label{display:block;font-size:.68rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:20px 0 4px}
+  input[type=text],input[type=email],input[type=password],input[type=tel]{width:100%;padding:10px 2px;border:0;border-bottom:1px solid var(--line-strong);border-radius:0;background:transparent;font:inherit;color:var(--ink);font-size:1.05rem;transition:border-color .3s}
+  input:focus{outline:none;border-color:var(--ink)}
+  input.code{letter-spacing:.24em;text-transform:uppercase;font-size:1.3rem;font-weight:500;text-align:center}
+  .check{display:flex;gap:10px;align-items:flex-start;margin-top:20px;font-size:.86rem;color:var(--muted);font-weight:300}
+  .check input{margin-top:3px;accent-color:var(--ink);width:17px;height:17px;flex:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);text-decoration:none;transition:background .3s,color .3s}
+  .btn:hover{background:var(--ink);color:var(--white)}
+  .btn-primary{background:var(--ink);color:var(--white);width:100%;margin-top:28px}
+  .btn-primary:hover{background:transparent;color:var(--ink)}
+  .btn-primary:disabled{opacity:.5;cursor:wait}
+  .btn-ghost{width:auto}
+  .btn-sm{padding:9px 16px;font-size:.7rem}
+  .link{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:.86rem;margin-top:16px;font-weight:300}
+  .msg{margin-top:16px;font-size:.88rem;padding:12px 14px;border-radius:12px}
+  .msg.err{background:var(--warn-bg);color:var(--warn)}
+  .msg.ok{background:var(--ok-bg);color:var(--ok)}
+  .hello{border-left:1.5px solid var(--ink);padding:4px 0 4px 14px;margin-top:18px;font-size:1rem;font-weight:300}
+  .hello b{font-weight:700}
+  .auth-foot{margin-top:26px;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);text-align:center;font-weight:500}
+  .auth-foot a{text-decoration:none}
+
+  /* ---------- App ---------- */
+  .top{position:sticky;top:0;z-index:20;background:rgba(241,242,240,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .top-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px clamp(16px,4vw,40px)}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--white);border:0;font-weight:700;font-size:.78rem;letter-spacing:.08em}
+  main{max-width:1080px;margin:0 auto;padding:30px clamp(16px,4vw,40px) calc(100px + var(--safe-b))}
+  .view h2{font-size:clamp(2.2rem,6vw,3.4rem);font-weight:700;line-height:.95;letter-spacing:-.04em;margin-bottom:12px}
+  .view h2 span{font-weight:300;color:var(--muted)}
+  .view .lead{color:var(--muted);margin-bottom:28px;font-weight:300;max-width:52ch}
+
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(250,250,248,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+  .tabs-in{max-width:620px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+  .tabs button{border:0;background:none;padding:10px 2px 11px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:.6rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;position:relative}
+  .tabs button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.4}
+  .tabs button.on{color:var(--ink);font-weight:700}
+  .tabs button.on::before{content:"";position:absolute;top:-1px;left:32%;right:32%;height:1.5px;background:var(--ink)}
+  .badge{position:absolute;top:5px;left:calc(50% + 6px);background:var(--ink);color:var(--white);border-radius:999px;font-size:.58rem;min-width:16px;height:16px;line-height:16px;padding:0 4px;text-align:center;letter-spacing:0}
+
+  @media (min-width:861px){
+    .tabs{position:sticky;top:71px;bottom:auto;border-top:0;border-bottom:1px solid var(--line);background:rgba(241,242,240,.86)}
+    .tabs-in{max-width:1080px;display:flex;gap:clamp(18px,2.4vw,34px);padding:0 clamp(16px,4vw,40px)}
+    .tabs button{flex-direction:row;font-size:.74rem;letter-spacing:.14em;padding:16px 0;gap:8px}
+    .tabs button svg{display:none}
+    .tabs button.on::before{top:auto;bottom:-1px;left:0;right:0}
+    .badge{position:static;margin-left:2px}
+    main{padding-bottom:70px}
+  }
+
+  /* ---------- Cards ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(20px,2.4vw,28px);margin-bottom:16px}
+  .card h3{font-size:1.25rem;font-weight:500;letter-spacing:-.02em;line-height:1.2}
+  .muted{color:var(--muted);font-size:.9rem;font-weight:300}
+  .grid2{display:grid;gap:16px}
+  @media (min-width:700px){.grid2{grid-template-columns:1fr 1fr}.grid2 .card{margin-bottom:0}.grid2{margin-bottom:16px}}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .pill{display:inline-block;font-size:.62rem;font-weight:700;padding:5px 11px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink-soft);text-transform:uppercase;letter-spacing:.14em;white-space:nowrap}
+  .pill.amber,.pill.blue{background:var(--ink);border-color:var(--ink);color:var(--white)}
+  .pill.ok{background:var(--ok-bg);border-color:transparent;color:var(--ok)}
+  .home-hero{background:var(--stone);color:var(--ink);border:0;position:relative;overflow:hidden}
+  .home-hero .muted{color:var(--ink-soft)}
+  .home-hero .lbl{font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+  .big-date{font-size:clamp(1.6rem,5vw,2.3rem);font-weight:700;letter-spacing:-.03em;line-height:1.05;margin-top:10px}
+  .big-date span{font-weight:300;color:var(--white)}
+  .clickable{cursor:pointer;transition:border-color .3s,transform .45s var(--ease)}
+  .clickable:hover{border-color:var(--line-strong)}
+  .go{display:inline-flex;gap:8px;align-items:center;font-size:.86rem;font-weight:300;color:var(--ink-soft);padding:4px 14px 5px 10px;border-left:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);margin-top:16px;text-decoration:none;transition:color .25s,border-color .25s}
+  .go:hover{color:var(--ink);border-color:var(--ink)}
+
+  /* semana */
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+  .day{text-align:center;font-size:.6rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .day .dot{width:32px;height:32px;margin:6px auto 0;border-radius:50%;border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:.8rem;letter-spacing:0;color:var(--ink-soft);font-weight:400}
+  .day.done .dot{background:var(--ink);border-color:var(--ink);color:var(--white)}
+  .day.today .dot{border-width:2px;border-color:var(--ink)}
+
+  /* exercícios */
+  .ex{padding:0;overflow:hidden}
+  .ex-video{position:relative;aspect-ratio:16/9;background:var(--stone) center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--white);border:0;width:100%}
+  .ex-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .ex-video .play{width:64px;height:64px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center;transition:transform .45s var(--ease)}
+  .ex-video:hover .play{transform:scale(1.08)}
+  .ex-video .play svg{width:22px;height:22px;fill:var(--ink);margin-left:4px}
+  .ex-video.none{font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)}
+  .ex-body{padding:20px clamp(20px,2.4vw,26px) 24px}
+  .ex-num{font-size:.66rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .dose{display:flex;flex-wrap:wrap;gap:0;margin:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .dose div{padding:10px 18px 10px 0;margin-right:18px;font-size:.6rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .dose b{display:block;font-size:1.1rem;font-weight:700;letter-spacing:-.01em;text-transform:none;color:var(--ink);margin-top:2px}
+  .tip{font-size:.9rem;color:var(--ink-soft);font-weight:300;border-left:1.5px solid var(--ink);padding-left:12px;margin-top:12px}
+  .tip b{font-weight:700}
+  .done-btn{width:100%;margin-top:20px}
+  .done-btn.on{background:var(--ink);color:var(--white)}
+  @media (min-width:861px){.ex-list{display:grid;grid-template-columns:1fr 1fr;gap:16px}.ex-list .card{margin:0}}
+
+  /* avaliações */
+  .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0;margin-top:18px;border-top:1px solid var(--line)}
+  .metric{padding:12px 12px 12px 0;border-bottom:1px solid var(--line)}
+  .metric .n{font-size:.62rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .metric .v{font-size:1.6rem;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-top:2px}
+  .metric .v small{font-size:.8rem;color:var(--muted);font-weight:300;margin-left:3px;letter-spacing:0}
+  .evo{display:grid}
+  .evo-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+  .evo-row:last-child{border-bottom:0}
+  .evo-row .val{font-size:1.4rem;font-weight:700;letter-spacing:-.03em}
+  .evo-row .val span{font-weight:300;color:var(--muted)}
+  .evo-row svg{width:120px;height:36px}
+
+  /* recados */
+  .recado{position:relative}
+  .recado.novo{border-color:var(--ink)}
+  .recado.novo::after{content:"Novo";position:absolute;top:clamp(20px,2.4vw,28px);right:clamp(20px,2.4vw,28px);font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;background:var(--ink);color:var(--white);padding:4px 10px;border-radius:999px}
+  .recado p{white-space:pre-wrap;font-weight:300;font-size:1.02rem}
+  .recado .muted{font-size:.66rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase}
+
+  /* agenda */
+  .ag{display:flex;gap:20px;align-items:center}
+  .ag-date{flex:none;width:64px;text-align:center;border-right:1px solid var(--line);padding-right:18px}
+  .ag-date .d{font-size:2rem;font-weight:700;letter-spacing:-.04em;line-height:1}
+  .ag-date .m{font-size:.62rem;font-weight:500;text-transform:uppercase;color:var(--muted);letter-spacing:.18em;margin-top:4px}
+  .past{opacity:.55}
+  .section-t{font-size:.68rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:34px 0 14px;display:flex;align-items:center;gap:12px}
+  .section-t::before{content:"";width:30px;height:1.5px;background:currentColor}
+
+  .empty{text-align:center;padding:40px 18px;color:var(--muted);font-weight:300}
+  .wide{width:100%;margin-top:8px}
+  .demo-bar{background:var(--ink);color:var(--white);text-align:center;font-size:.64rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;padding:8px 12px}
+  .loader{display:flex;align-items:center;justify-content:center;min-height:60vh;color:var(--muted);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase}
+  .modal{position:fixed;inset:0;background:rgba(18,21,23,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+  .modal-box{background:var(--paper);width:100%;max-width:560px;max-height:85vh;overflow:auto;border-radius:var(--radius) var(--radius) 0 0;padding:28px 24px calc(24px + var(--safe-b))}
+  .modal-box h3{font-size:1.5rem;font-weight:700;letter-spacing:-.03em;margin-bottom:14px}
+  .modal-box p,.modal-box li{font-size:.92rem;color:var(--ink-soft);margin-bottom:10px;font-weight:300}
+  .modal-box b{font-weight:700;color:var(--ink)}
+  .modal-box ul{padding-left:18px}
+  @media (min-width:700px){.modal{align-items:center}.modal-box{border-radius:var(--radius)}}
+  .view:not(.hidden){animation:fadeup .6s var(--ease)}
+  @keyframes fadeup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.view:not(.hidden){animation:none}}
+
+  /* ===== v2 · visual clean (editorial, como o site) ===== */
+  main{max-width:780px}
+  .top{background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .top-in{max-width:780px}
+  .avatar{background:none;color:var(--ink);border:1px solid var(--line-strong);font-weight:500}
+  .tabs,.tabs-in{all:unset}
+  .tabs{display:block;position:sticky;top:71px;z-index:19;background:var(--paper);border-bottom:1px solid var(--line)}
+  .tabs-in{display:flex;gap:26px;max-width:780px;margin:0 auto;padding:0 clamp(16px,4vw,40px);overflow-x:auto;scrollbar-width:none}
+  .tabs-in::-webkit-scrollbar{display:none}
+  .tabs button{flex:none;border:0;background:none;padding:15px 0 14px;display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);position:relative}
+  .tabs button svg{display:none}
+  .tabs button.on{color:var(--ink)}
+  .tabs button.on::before{content:"";position:absolute;left:0;right:0;bottom:-1px;top:auto;height:1.5px;background:var(--ink)}
+  .badge{position:static;margin-left:2px;background:none;color:var(--ink);min-width:0;padding:0;font-weight:700}
+  main{padding:34px clamp(16px,4vw,40px) 80px}
+  .view h2{font-size:clamp(2rem,6vw,2.8rem);font-weight:300;letter-spacing:-.03em}
+  .view h2 b{font-weight:700}
+  .view h2 span{color:var(--ink);font-weight:700}
+  .card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:22px 0;margin:0}
+  .card h3{font-size:1.05rem;font-weight:500}
+  .pill{border:0;padding:0;font-size:.62rem;color:var(--muted);letter-spacing:.18em}
+  .pill.amber,.pill.blue,.pill.ok{background:none;color:var(--muted)}
+  .btn.wide{border:0;border-top:1px solid var(--line);border-radius:0;justify-content:space-between;padding:20px 0;font-weight:500;letter-spacing:.14em;margin-top:0}
+  .btn.wide::after{content:"→"}
+  .btn.wide:hover{background:none;color:var(--ink)}
+  .ex{border-top:1px solid var(--line)}
+  .done-btn{border-width:1px}
+  /* linhas do início */
+  .lines{border-bottom:1px solid var(--line);margin-top:30px}
+  .ln{display:grid;grid-template-columns:150px 1fr;gap:18px;padding:20px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+  .ln .k{font-size:.66rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding-top:4px}
+  .ln .v{font-size:1.02rem;font-weight:400;line-height:1.45}
+  .ln .v small{display:block;font-size:.86rem;font-weight:300;color:var(--muted);margin-top:2px}
+  .ln .v .big{font-size:1.5rem;font-weight:300;letter-spacing:-.02em}
+  .ln .v .big b{font-weight:700}
+  .ln.go-row{cursor:pointer}
+  .ln.go-row:hover .v{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+  .soft{color:var(--muted);font-weight:300}
+  .txtlink{display:inline-flex;gap:6px;align-items:center;font-size:.86rem;font-weight:400;color:var(--ink-soft);background:none;border:0;border-bottom:1px solid var(--line-strong);padding:0 0 2px;margin-top:10px;text-decoration:none;cursor:pointer}
+  .txtlink:hover{color:var(--ink);border-color:var(--ink)}
+  /* acompanhamento */
+  .trend{display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;padding:16px 0;border-top:1px solid var(--line)}
+  .trend .n{font-size:.92rem;font-weight:400}
+  .trend .n small{display:block;font-size:.74rem;color:var(--muted);font-weight:300}
+  .trend .val{font-size:1.3rem;font-weight:300;letter-spacing:-.02em;white-space:nowrap}
+  .trend .val b{font-weight:700}
+  .trend svg{width:96px;height:28px}
+  .tl{display:grid;grid-template-columns:110px 1fr;gap:20px;padding:22px 0;border-top:1px solid var(--line)}
+  .tl .d{font-size:.66rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding-top:4px;line-height:1.7}
+  .tl h3{font-size:1.05rem;font-weight:500;margin-bottom:6px}
+  .tl p{font-size:.95rem;font-weight:300;color:var(--ink-soft);line-height:1.6}
+  .tl .mini{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:10px;font-size:.8rem;color:var(--muted);font-weight:300}
+  .tl .mini b{color:var(--ink);font-weight:700}
+  .stitle{font-size:.66rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:38px 0 6px}
+  @media (max-width:600px){ .ln,.tl{grid-template-columns:1fr;gap:6px} .ln .k,.tl .d{padding-top:0} }
+  @media (min-width:861px){.tabs{top:71px}}
+</style>
+</head>
+<body>
+
+<div id="demoBar" class="demo-bar hidden">Modo demonstração — dados fictícios</div>
+
+<!-- ================= AUTH ================= -->
+<section id="auth" class="auth hidden">
+  <div class="auth-card">
+    <a class="brand" href="/">Isack Nícholas</a>
+    <h1>Área do<span>paciente</span></h1>
+    <p class="sub">Seus exercícios, avaliações e recados em um só lugar.</p>
+
+    <div class="seg" id="authSeg">
+      <button data-auth="login" class="on">Entrar</button>
+      <button data-auth="first">Primeiro acesso</button>
+    </div>
+
+    <!-- login -->
+    <form id="fLogin">
+      <label for="lEmail">E-mail</label>
+      <input id="lEmail" type="email" autocomplete="email" required>
+      <label for="lPass">Senha</label>
+      <input id="lPass" type="password" autocomplete="current-password" required>
+      <button class="btn btn-primary" type="submit">Entrar</button>
+      <button class="link" type="button" data-auth="forgot">Esqueci minha senha</button>
+    </form>
+
+    <!-- primeiro acesso: passo 1 -->
+    <form id="fCode" class="hidden">
+      <label for="cCode">Código de acesso</label>
+      <input id="cCode" class="code" type="text" autocomplete="off" placeholder="XXXXXXXX" required>
+      <p class="muted" style="margin-top:8px">O código foi entregue pelo seu fisioterapeuta.</p>
+      <button class="btn btn-primary" type="submit">Continuar</button>
+    </form>
+
+    <!-- primeiro acesso: passo 2 -->
+    <form id="fSignup" class="hidden">
+      <div class="hello" id="helloName"></div>
+      <label for="sEmail">E-mail</label>
+      <input id="sEmail" type="email" autocomplete="email" required>
+      <label for="sTel">Telefone (WhatsApp)</label>
+      <input id="sTel" type="tel" autocomplete="tel" placeholder="(34) 9 0000-0000">
+      <label for="sPass">Crie uma senha</label>
+      <input id="sPass" type="password" autocomplete="new-password" minlength="8" required placeholder="mínimo 8 caracteres">
+      <label for="sPass2">Repita a senha</label>
+      <input id="sPass2" type="password" autocomplete="new-password" minlength="8" required>
+      <div class="check">
+        <input id="sTerms" type="checkbox" required>
+        <span>Li e concordo com o <a href="#" data-open="termos">termo de uso e privacidade</a> e autorizo o uso dos meus dados de saúde para o meu acompanhamento fisioterapêutico.</span>
+      </div>
+      <button class="btn btn-primary" type="submit">Criar meu acesso</button>
+      <button class="link" type="button" data-auth="first">Voltar</button>
+    </form>
+
+    <!-- esqueci -->
+    <form id="fForgot" class="hidden">
+      <label for="fEmail">E-mail cadastrado</label>
+      <input id="fEmail" type="email" autocomplete="email" required>
+      <button class="btn btn-primary" type="submit">Enviar link para redefinir</button>
+      <button class="link" type="button" data-auth="login">Voltar</button>
+    </form>
+
+    <!-- nova senha (após link do e-mail) -->
+    <form id="fNewPass" class="hidden">
+      <label for="nPass">Nova senha</label>
+      <input id="nPass" type="password" autocomplete="new-password" minlength="8" required>
+      <button class="btn btn-primary" type="submit">Salvar nova senha</button>
+    </form>
+
+    <div id="authMsg"></div>
+    <div class="auth-foot">
+      <a href="/">← Voltar ao site</a> · <a href="?demo">Ver demonstração</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= APP ================= -->
+<section id="app" class="hidden">
+  <header class="top">
+    <div class="top-in">
+      <a class="brand" href="/">Isack Nícholas</a>
+      <button class="avatar" id="avatarBtn" aria-label="Meu perfil">··</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <div class="tabs-in">
+      <button data-v="inicio" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Início</button>
+      <button data-v="exercicios"><svg viewBox="0 0 24 24"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg>Exercícios</button>
+      <button data-v="avaliacoes"><svg viewBox="0 0 24 24"><path d="M9 4h6v3H9zM7 5H5v16h14V5h-2M8 13l3 3 5-6"/></svg>Avaliações</button>
+      <button data-v="recados"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/></svg>Recados<span class="badge hidden" id="recBadge"></span></button>
+      <button data-v="agenda"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Agenda</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="view" id="v-inicio"></div>
+    <div class="view hidden" id="v-exercicios"></div>
+    <div class="view hidden" id="v-avaliacoes"></div>
+    <div class="view hidden" id="v-recados"></div>
+    <div class="view hidden" id="v-agenda"></div>
+    <div class="view hidden" id="v-perfil"></div>
+  </main>
+</section>
+
+<div id="loader" class="loader">Carregando…</div>
+
+<!-- termo -->
+<div class="modal hidden" id="m-termos">
+  <div class="modal-box">
+    <h3>Termo de uso e privacidade</h3>
+    <p>Esta área é um canal de acompanhamento entre você e seu fisioterapeuta, Isack Nícholas (Uberlândia/MG).</p>
+    <ul>
+      <li><b>Quais dados:</b> nome, e-mail, telefone, avaliações, prescrições de exercícios, recados e agendamentos.</li>
+      <li><b>Para quê:</b> exclusivamente para o seu acompanhamento fisioterapêutico.</li>
+      <li><b>Quem acessa:</b> apenas você e seu fisioterapeuta. Os dados não são vendidos nem compartilhados com terceiros.</li>
+      <li><b>Segurança:</b> acesso com senha pessoal; os dados ficam em servidor com criptografia, e cada paciente só vê as próprias informações.</li>
+      <li><b>Seus direitos (LGPD):</b> você pode pedir a qualquer momento acesso, correção ou exclusão dos seus dados pelo WhatsApp (34) 99139-6892 ou e-mail nicholasalmeida.ft@gmail.com.</li>
+      <li>Esta área não substitui o atendimento presencial. Em caso de dor intensa ou piora, entre em contato antes de continuar os exercícios.</li>
+    </ul>
+    <button class="btn btn-primary" data-close>Entendi</button>
+  </div>
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const SUPABASE_URL = 'https://elqjjriodflxfegnklmx.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_WKA2sLiDcUhKBqJ1HbmwqA_2N-lLuRR';
+const WHATS = '5534991396892';
+const TZ = 'America/Sao_Paulo';
+const DEMO = new URLSearchParams(location.search).has('demo');
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayISO = () => new Intl.DateTimeFormat('en-CA',{timeZone:TZ}).format(new Date());
+const isoOf = d => new Intl.DateTimeFormat('en-CA',{timeZone:TZ}).format(d);
+const fmtDate = (d, o={day:'2-digit',month:'short',year:'numeric'}) => new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,...o}).format(typeof d==='string' && d.length===10 ? new Date(d+'T12:00:00-03:00') : new Date(d));
+const fmtTime = d => new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'2-digit',minute:'2-digit'}).format(new Date(d));
+const TIPO = {inicial:['Avaliação inicial','blue'], evolucao:['Evolução','ok'], reavaliacao:['Reavaliação','amber']};
+
+/* ================= API (real + demo) ================= */
+let sb = null;
+if (!DEMO) {
+  if (!window.supabase) { document.body.innerHTML = '<p style="padding:40px;font-family:sans-serif">Não foi possível carregar a área do paciente. Verifique sua conexão e recarregue a página.</p>'; throw new Error('supabase-js'); }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true}});
+}
+
+const demoData = (() => {
+  const t = new Date(), add = (n,h=18) => { const d = new Date(t); d.setDate(d.getDate()+n); d.setHours(h,0,0,0); return d.toISOString(); };
+  const ex = (id,codigo,nome,desc,dicas) => ({id,codigo,nome,descricao:desc,dicas,youtube_id:null,regiao:'Quadril'});
+  return {
+    paciente:{id:'p1',nome:'Paciente Demonstração',email:'demo@exemplo.com',telefone:'(34) 90000-0000'},
+    prescricoes:[{id:'pr1',titulo:'Fase 1 — Controle e força de quadril',objetivo:'Reduzir dor ao correr e fortalecer glúteo médio',observacoes:'Fazer em dias alternados. Dor até 3/10 durante o exercício é aceitável.',inicio:todayISO(),
+      prescricao_itens:[
+        {id:'i1',ordem:1,series:'3',repeticoes:'12',descanso:'60 s',frequencia:'3x por semana',observacoes:null,exercicios:ex('e1','QUA-001','Ponte bilateral','Deitado de barriga para cima, joelhos dobrados. Eleve o quadril até alinhar tronco e coxas.','Contraia o glúteo no topo; não arqueie a lombar.')},
+        {id:'i2',ordem:2,series:'3',repeticoes:'12',descanso:'60 s',frequencia:'3x por semana',observacoes:'Começar sem caneleira',exercicios:ex('e2','QUA-002','Abdução de quadril em decúbito lateral','Deitado de lado, eleve a perna de cima mantendo o joelho estendido e o pé neutro.','Não gire o quadril para trás; movimento lento.')},
+        {id:'i3',ordem:3,series:'3',repeticoes:'20–30 s',descanso:'60 s',frequencia:'3x por semana',observacoes:null,exercicios:ex('e3','QUA-004','Prancha lateral com joelhos apoiados','Apoie antebraço e joelhos, eleve o quadril e sustente.','Ombro sobre o cotovelo; respire normalmente.')}
+      ]}],
+    execucoes:[{item_id:'i1',data:isoOf(new Date(Date.now()-2*864e5))},{item_id:'i2',data:isoOf(new Date(Date.now()-2*864e5))},{item_id:'i1',data:isoOf(new Date(Date.now()-4*864e5))}],
+    avaliacoes:[
+      {id:'a2',tipo:'evolucao',regiao:'Quadril',data:todayISO(),titulo:'Evolução — 1º mês',resumo:'Boa adesão aos exercícios. Dor ao correr diminuiu; já corre 3 km sem dor.',metricas:[{nome:'Dor (EVA)',valor:3,unidade:'/10'},{nome:'Força abdutores D',valor:18,unidade:'kgf'},{nome:'Ponte unilateral D',valor:18,unidade:'rep'}],arquivo_path:null},
+      {id:'a1',tipo:'inicial',regiao:'Quadril',data:isoOf(new Date(Date.now()-30*864e5)),titulo:'Avaliação inicial',resumo:'Dor lateral no quadril direito, piora ao correr e ao deitar sobre o lado. Força de abdutores reduzida à direita.',metricas:[{nome:'Dor (EVA)',valor:6,unidade:'/10'},{nome:'Força abdutores D',valor:14,unidade:'kgf'},{nome:'Ponte unilateral D',valor:10,unidade:'rep'}],arquivo_path:null}
+    ],
+    recados:[
+      {id:'r2',texto:'Semana que vem vamos aumentar a carga da abdução. Continue registrando os dias que fizer.',criado_em:add(0,9),lido_em:null},
+      {id:'r1',texto:'Bem-vindo à sua área! Aqui ficam seus exercícios, avaliações e recados. Qualquer dúvida, me chama no WhatsApp.',criado_em:add(-3,9),lido_em:add(-3,10)}
+    ],
+    agendamentos:[
+      {id:'g0',inicio:add(-5),fim:add(-5,19),tipo:'Sessão',local:'Labs for Fit',status:'realizado'},
+      {id:'g1',inicio:add(2),fim:add(2,19),tipo:'Sessão',local:'Labs for Fit',status:'confirmado'},
+      {id:'g2',inicio:add(30),fim:add(30,19),tipo:'Reavaliação',local:'Labs for Fit',status:'agendado'}
+    ]
+  };
+})();
+
+const api = {
+  async loadAll() {
+    if (DEMO) return structuredClone(demoData);
+    const since = isoOf(new Date(Date.now() - 21*864e5));
+    const [p, pr, exe, av, rc, ag] = await Promise.all([
+      sb.from('pacientes').select('id,nome,email,telefone').maybeSingle(),
+      sb.from('prescricoes').select('id,titulo,objetivo,observacoes,inicio,fim,prescricao_itens(id,ordem,series,repeticoes,carga,descanso,frequencia,observacoes,exercicios(id,codigo,nome,descricao,dicas,youtube_id,regiao))').eq('ativa',true).order('inicio',{ascending:false}),
+      sb.from('execucoes').select('item_id,data').gte('data', since),
+      sb.from('avaliacoes').select('id,tipo,regiao,data,titulo,resumo,metricas,arquivo_path').order('data',{ascending:false}),
+      sb.from('recados').select('id,texto,criado_em,lido_em').order('criado_em',{ascending:false}),
+      sb.from('agendamentos').select('id,inicio,fim,tipo,local,status').order('inicio')
+    ]);
+    for (const r of [p,pr,exe,av,rc,ag]) if (r.error) throw r.error;
+    pr.data.forEach(x => x.prescricao_itens.sort((a,b)=>a.ordem-b.ordem));
+    return {paciente:p.data, prescricoes:pr.data, execucoes:exe.data, avaliacoes:av.data, recados:rc.data, agendamentos:ag.data};
+  },
+  async setDone(itemId, on) {
+    const data = todayISO();
+    if (DEMO) return;
+    if (on) { const {error} = await sb.from('execucoes').insert({item_id:itemId, paciente_id:S.paciente.id, data}); if (error && error.code!=='23505') throw error; }
+    else { const {error} = await sb.from('execucoes').delete().eq('item_id',itemId).eq('data',data); if (error) throw error; }
+  },
+  async markRead(id) { if (!DEMO) await sb.rpc('marcar_recado_lido',{p_id:id}); },
+  async updatePhone(t) { if (DEMO) return; const {error} = await sb.rpc('atualizar_meu_telefone',{p_telefone:t}); if (error) throw error; },
+  async pdfUrl(path) { if (DEMO) return null; const {data,error} = await sb.storage.from('avaliacoes').createSignedUrl(path, 120); if (error) throw error; return data.signedUrl; }
+};
+
+/* ================= STATE ================= */
+let S = null;
+let currentView = 'inicio';
+
+/* ================= AUTH UI ================= */
+let pendingCode = null;
+function authMode(m) {
+  ['fLogin','fCode','fSignup','fForgot','fNewPass'].forEach(id => $('#'+id).classList.add('hidden'));
+  const map = {login:'fLogin', first:'fCode', signup:'fSignup', forgot:'fForgot', newpass:'fNewPass'};
+  $('#'+map[m]).classList.remove('hidden');
+  $$('#authSeg button').forEach(b => b.classList.toggle('on', b.dataset.auth === (m==='signup'?'first':m)));
+  $('#authSeg').classList.toggle('hidden', m==='forgot' || m==='newpass');
+  msg('');
+}
+function msg(text, kind='err') { $('#authMsg').innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : ''; }
+function busy(form, on) { const b = form.querySelector('button[type=submit]'); if (b) b.disabled = on; }
+function translateErr(e) {
+  const m = (e && (e.message || e.error_description)) || String(e);
+  if (/Invalid login/i.test(m)) return 'E-mail ou senha incorretos.';
+  if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail pelo link que enviamos antes de entrar.';
+  if (/already registered|already been registered/i.test(m)) return 'Este e-mail já tem cadastro. Use "Entrar" ou "Esqueci minha senha".';
+  if (/Código de acesso inválido|Database error saving new user/i.test(m)) return 'Código inválido ou já utilizado. Confira com seu fisioterapeuta.';
+  if (/rate limit|too many/i.test(m)) return 'Muitas tentativas. Aguarde alguns minutos e tente de novo.';
+  if (/Password should be/i.test(m)) return 'A senha precisa ter pelo menos 8 caracteres.';
+  return 'Algo deu errado: ' + m;
+}
+
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-auth]'); if (a) { e.preventDefault(); authMode(a.dataset.auth); }
+  const o = e.target.closest('[data-open]'); if (o) { e.preventDefault(); $('#m-'+o.dataset.open).classList.remove('hidden'); }
+  if (e.target.closest('[data-close]') || e.target.classList.contains('modal')) $$('.modal').forEach(m => m.classList.add('hidden'));
+});
+
+$('#fLogin').addEventListener('submit', async e => {
+  e.preventDefault(); busy(e.target,true); msg('');
+  const {error} = await sb.auth.signInWithPassword({email:$('#lEmail').value.trim(), password:$('#lPass').value});
+  busy(e.target,false);
+  if (error) msg(translateErr(error));
+});
+
+$('#fCode').addEventListener('submit', async e => {
+  e.preventDefault(); busy(e.target,true); msg('');
+  const code = $('#cCode').value.trim().toUpperCase();
+  const {data, error} = await sb.rpc('verificar_codigo',{p_codigo:code});
+  busy(e.target,false);
+  if (error) return msg(translateErr(error));
+  if (!data) return msg('Código inválido ou já utilizado. Confira com seu fisioterapeuta.');
+  pendingCode = code;
+  $('#helloName').innerHTML = `Olá, <b>${esc(data)}</b>! Agora crie seu login.`;
+  authMode('signup');
+});
+
+$('#fSignup').addEventListener('submit', async e => {
+  e.preventDefault(); msg('');
+  if ($('#sPass').value !== $('#sPass2').value) return msg('As senhas não conferem.');
+  busy(e.target,true);
+  const {data, error} = await sb.auth.signUp({
+    email:$('#sEmail').value.trim(), password:$('#sPass').value,
+    options:{ emailRedirectTo: location.origin + location.pathname,
+              data:{ codigo:pendingCode, telefone:$('#sTel').value.trim(), consentimento_em:new Date().toISOString() } }
+  });
+  busy(e.target,false);
+  if (error) return msg(translateErr(error));
+  if (!data.session) { authMode('login'); msg('Cadastro criado! Enviamos um link de confirmação para o seu e-mail. Depois de confirmar, é só entrar.','ok'); }
+});
+
+$('#fForgot').addEventListener('submit', async e => {
+  e.preventDefault(); busy(e.target,true);
+  const {error} = await sb.auth.resetPasswordForEmail($('#fEmail').value.trim(), {redirectTo: location.origin + location.pathname});
+  busy(e.target,false);
+  if (error) return msg(translateErr(error));
+  msg('Se o e-mail estiver cadastrado, você vai receber um link para criar uma nova senha.','ok');
+});
+
+$('#fNewPass').addEventListener('submit', async e => {
+  e.preventDefault(); busy(e.target,true);
+  const {error} = await sb.auth.updateUser({password:$('#nPass').value});
+  busy(e.target,false);
+  if (error) return msg(translateErr(error));
+  msg('Senha alterada!','ok'); recovering = false; start();
+});
+
+/* ================= BOOT ================= */
+let recovering = false;
+function show(id) { ['auth','app','loader'].forEach(x => $('#'+x).classList.toggle('hidden', x!==id)); }
+
+async function start() {
+  if (DEMO) { $('#demoBar').classList.remove('hidden'); S = await api.loadAll(); return enterApp(); }
+  const {data:{session}} = await sb.auth.getSession();
+  if (!session) { show('auth'); authMode('login'); return; }
+  if (recovering) { show('auth'); authMode('newpass'); return; }
+  show('loader');
+  try {
+    S = await api.loadAll();
+  } catch (err) {
+    show('auth'); authMode('login'); msg('Não foi possível carregar seus dados. Tente novamente.'); return;
+  }
+  if (!S.paciente) {
+    const {data:eq} = await sb.rpc('is_equipe');
+    show('auth'); authMode('login');
+    msg(eq ? 'Você entrou como fisioterapeuta. O painel do fisioterapeuta será a próxima etapa — por enquanto, use o modo demonstração para ver a área do paciente.'
+           : 'Sua conta não está vinculada a um paciente. Fale com seu fisioterapeuta.', eq ? 'ok' : 'err');
+    $('#authMsg').insertAdjacentHTML('beforeend','<button class="link" id="outBtn">Sair</button>');
+    $('#outBtn').onclick = () => sb.auth.signOut();
+    return;
+  }
+  enterApp();
+}
+
+let lastUid; // evita recarregar quando o mesmo usuário "re-entra" (troca de aba, refresh de token)
+if (!DEMO) {
+  if (/type=recovery/.test(location.hash)) recovering = true;
+  sb.auth.onAuthStateChange((ev, session) => {
+    if (ev === 'PASSWORD_RECOVERY') { recovering = true; show('auth'); authMode('newpass'); return; }
+    const uid = session?.user?.id || null;
+    if (ev === 'INITIAL_SESSION' || uid !== lastUid) { lastUid = uid; setTimeout(start, 0); }
+  });
+}
+
+function enterApp() {
+  show('app');
+  const ini = S.paciente.nome.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  $('#avatarBtn').textContent = ini;
+  const h = location.hash.slice(1);
+  go(['inicio','exercicios','avaliacoes','recados','agenda','perfil'].includes(h) ? h : 'inicio', false);
+}
+
+/* ================= NAV ================= */
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (b) go(b.dataset.v); });
+$('#avatarBtn').addEventListener('click', () => go('perfil'));
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (S && h && h!==currentView && $('#v-'+h)) go(h,false); });
+
+function go(v, push=true) {
+  currentView = v;
+  $$('.view').forEach(x => x.classList.toggle('hidden', x.id !== 'v-'+v));
+  $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  if (push) history.replaceState(null,'','#'+v);
+  render[v]();
+  updateBadge();
+  window.scrollTo({top:0});
+}
+
+function updateBadge() {
+  const n = S.recados.filter(r => !r.lido_em).length;
+  const b = $('#recBadge'); b.textContent = n; b.classList.toggle('hidden', !n);
+}
+
+/* ================= HELPERS ================= */
+const allItems = () => S.prescricoes.flatMap(p => p.prescricao_itens);
+const doneToday = id => S.execucoes.some(x => x.item_id===id && x.data===todayISO());
+function weekStrip() {
+  const days = [];
+  for (let i=6;i>=0;i--) days.push(isoOf(new Date(Date.now()-i*864e5)));
+  const ids = new Set(allItems().map(i=>i.id));
+  const labels = ['dom','seg','ter','qua','qui','sex','sáb'];
+  return `<div class="week">${days.map(d => {
+    const done = S.execucoes.some(x => x.data===d && ids.has(x.item_id));
+    const dt = new Date(d+'T12:00:00-03:00');
+    return `<div class="day ${done?'done':''} ${d===todayISO()?'today':''}">${labels[dt.getDay()]}<div class="dot">${done?'✓':dt.getDate()}</div></div>`;
+  }).join('')}</div>`;
+}
+const nextAppt = () => S.agendamentos.find(a => new Date(a.inicio) > new Date() && a.status!=='cancelado');
+const waLink = t => `https://wa.me/${WHATS}?text=${encodeURIComponent(t)}`;
+const first = () => S.paciente.nome.split(' ')[0];
+function spark(vals) {
+  if (vals.length < 2) return '';
+  const min = Math.min(...vals), max = Math.max(...vals), r = (max-min)||1;
+  const pts = vals.map((v,i) => `${(i/(vals.length-1))*104+3},${31-((v-min)/r)*28}`).join(' ');
+  const last = pts.split(' ').pop().split(',');
+  return `<svg viewBox="0 0 110 34"><polyline points="${pts}" fill="none" stroke="#121517" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${last[0]}" cy="${last[1]}" r="3" fill="#121517"/></svg>`;
+}
+
+function trends() {
+  const chron = [...S.avaliacoes].sort((a,b)=>a.data.localeCompare(b.data));
+  const names = [...new Set(chron.flatMap(a => (a.metricas||[]).map(m=>m.nome)))];
+  return names.map(n => {
+    const pts = chron.map(a => ({a, m:(a.metricas||[]).find(m=>m.nome===n)})).filter(x=>x.m && !isNaN(Number(x.m.valor)));
+    return {n, u:pts[0]?.m.unidade||'', vals:pts.map(p=>Number(p.m.valor)), dates:pts.map(p=>fmtDate(p.a.data,{day:'2-digit',month:'2-digit'}))};
+  }).filter(t => t.vals.length >= 2);
+}
+function bindPdf(root) {
+  root.querySelectorAll('[data-pdf]').forEach(b => b.addEventListener('click', async () => {
+    const w = window.open('', '_blank');
+    try { const url = await api.pdfUrl(b.dataset.pdf); if (url) w.location = url; else w.close(); }
+    catch { w.close(); alertBox('Não foi possível abrir o arquivo agora.'); }
+  }));
+}
+
+/* ================= VIEWS ================= */
+const render = {
+  inicio() {
+    const n = nextAppt(), unread = S.recados.filter(r=>!r.lido_em), items = allItems();
+    const doneN = items.filter(i => doneToday(i.id)).length;
+    const hour = Number(new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'numeric',hour12:false}).format(new Date()));
+    const greet = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+    const tr = trends()[0], last = S.avaliacoes[0];
+    $('#v-inicio').innerHTML = `
+      <div class="eyebrow">Área do paciente</div>
+      <h2>${greet}, <b>${esc(first())}</b></h2>
+      <div class="lines">
+        <div class="ln go-row" onclick="go('agenda')"><div class="k">Próximo atendimento</div>
+          <div class="v">${n ? `${esc(fmtDate(n.inicio,{weekday:'long',day:'2-digit',month:'long'}))} · ${fmtTime(n.inicio)}<small>${esc(n.tipo||'Atendimento')}${n.local?' · '+esc(n.local):''}</small>` : `<span class="soft">Nenhum horário marcado</span>`}</div></div>
+        ${tr ? `<div class="ln go-row" onclick="go('avaliacoes')"><div class="k">Sua evolução</div>
+          <div class="v"><span class="big">${esc(tr.n)}: ${tr.vals[0]} → <b>${tr.vals[tr.vals.length-1]}</b>${tr.u?'<span class="soft" style="font-size:.9rem"> '+esc(tr.u)+'</span>':''}</span><small>Da avaliação inicial até hoje</small></div></div>` : ''}
+        <div class="ln go-row" onclick="go('exercicios')"><div class="k">Exercícios</div>
+          <div class="v">${items.length ? `${doneN} de ${items.length} feitos hoje<small>${esc(S.prescricoes[0].titulo)}</small>` : `<span class="soft">Nenhum exercício prescrito ainda</span>`}</div></div>
+        <div class="ln go-row" onclick="go('recados')"><div class="k">Recados</div>
+          <div class="v">${S.recados[0] ? `${unread.length?`<b>${unread.length} novo${unread.length>1?'s':''}</b> · `:''}${esc(S.recados[0].texto.slice(0,90))}${S.recados[0].texto.length>90?'…':''}` : `<span class="soft">Nenhum recado por enquanto</span>`}</div></div>
+        ${last ? `<div class="ln"><div class="k">Último relatório</div>
+          <div class="v">${esc(last.titulo)}<small>${esc(fmtDate(last.data))}</small>${last.arquivo_path?`<button class="txtlink" data-pdf="${esc(last.arquivo_path)}">Ver relatório em PDF ↗</button>`:''}</div></div>` : ''}
+      </div>
+      <a class="btn wide" style="border-top:0" href="${waLink('Olá, Isack! Sou '+S.paciente.nome+' e tenho uma dúvida.')}" target="_blank" rel="noopener">Falar com o Isack no WhatsApp</a>`;
+    bindPdf($('#v-inicio'));
+  },
+
+  exercicios() {
+    const el = $('#v-exercicios');
+    if (!S.prescricoes.length) { el.innerHTML = `<h2>Seus <span>exercícios</span></h2><div class="card empty">Você ainda não tem exercícios prescritos.<br>Eles aparecem aqui depois da sua avaliação.</div>`; return; }
+    el.innerHTML = `<h2>Seus <span>exercícios</span></h2><p class="lead">Marque cada exercício quando terminar. Isso me ajuda a acompanhar sua evolução.</p>` +
+      S.prescricoes.map(p => `
+        <div class="card">
+          <div class="eyebrow">Prescrição atual</div>
+          <h3>${esc(p.titulo)}</h3>
+          ${p.objetivo ? `<p class="muted" style="margin-top:4px"><b>Objetivo:</b> ${esc(p.objetivo)}</p>` : ''}
+          ${p.observacoes ? `<p class="tip">${esc(p.observacoes)}</p>` : ''}
+          ${weekStrip()}
+        </div>
+        <div class="ex-list">${p.prescricao_itens.map((it,idx) => {
+          const e = it.exercicios || {}, on = doneToday(it.id);
+          const thumb = e.youtube_id ? `style="background-image:url('https://i.ytimg.com/vi/${encodeURIComponent(e.youtube_id)}/hqdefault.jpg')"` : '';
+          return `<div class="card ex">
+            ${e.youtube_id
+              ? `<button class="ex-video" ${thumb} data-yt="${esc(e.youtube_id)}" aria-label="Assistir vídeo"><span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></button>`
+              : `<div class="ex-video none">Vídeo em breve</div>`}
+            <div class="ex-body">
+              <div class="ex-num">${String(idx+1).padStart(2,'0')}${e.codigo?' · '+esc(e.codigo):''}</div>
+              <h3>${esc(e.nome)}</h3>
+              <div class="dose">
+                ${it.series?`<div>Séries<b>${esc(it.series)}</b></div>`:''}
+                ${it.repeticoes?`<div>Repetições<b>${esc(it.repeticoes)}</b></div>`:''}
+                ${it.carga?`<div>Carga<b>${esc(it.carga)}</b></div>`:''}
+                ${it.descanso?`<div>Descanso<b>${esc(it.descanso)}</b></div>`:''}
+                ${it.frequencia?`<div>Frequência<b>${esc(it.frequencia)}</b></div>`:''}
+              </div>
+              ${e.descricao?`<p class="muted">${esc(e.descricao)}</p>`:''}
+              ${e.dicas?`<p class="tip">${esc(e.dicas)}</p>`:''}
+              ${it.observacoes?`<p class="tip"><b>Para você:</b> ${esc(it.observacoes)}</p>`:''}
+              <button class="btn done-btn ${on?'on':''}" data-done="${it.id}">${on?'✓ Feito hoje':'Marcar como feito hoje'}</button>
+            </div>
+          </div>`;
+        }).join('')}</div>`).join('');
+
+    el.querySelectorAll('[data-yt]').forEach(b => b.addEventListener('click', () => {
+      b.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(b.dataset.yt)}?autoplay=1&rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Vídeo do exercício"></iframe>`;
+    }, {once:true}));
+    el.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', async () => {
+      const id = b.dataset.done, on = !doneToday(id), d = todayISO();
+      b.disabled = true;
+      try {
+        await api.setDone(id, on);
+        if (on) S.execucoes.push({item_id:id, data:d}); else S.execucoes = S.execucoes.filter(x => !(x.item_id===id && x.data===d));
+        render.exercicios();
+      } catch (err) { b.disabled = false; alertBox('Não foi possível salvar. Verifique sua conexão.'); }
+    }));
+  },
+
+  avaliacoes() {
+    const el = $('#v-avaliacoes'), av = S.avaliacoes;
+    if (!av.length) { el.innerHTML = `<h2>Seu <b>acompanhamento</b></h2><p class="lead">Suas avaliações aparecem aqui assim que forem liberadas.</p>`; return; }
+    const ts = trends();
+    el.innerHTML = `<h2>Seu <b>acompanhamento</b></h2><p class="lead">Como você está evoluindo, avaliação por avaliação.</p>
+      ${ts.length ? `<div class="stitle">Evolução</div>${ts.map(t => `<div class="trend"><div class="n">${esc(t.n)}<small>${t.dates[0]} → ${t.dates[t.dates.length-1]}</small></div>
+        <div class="val">${t.vals[0]} → <b>${t.vals[t.vals.length-1]}</b><span class="soft" style="font-size:.8rem"> ${esc(t.u)}</span></div>${spark(t.vals)}</div>`).join('')}` : ''}
+      <div class="stitle">Avaliações</div>
+      ${av.map(a => `<div class="tl"><div class="d">${esc(fmtDate(a.data,{day:'2-digit',month:'short',year:'numeric'}))}<br>${TIPO[a.tipo][0]}</div><div>
+        <h3>${esc(a.titulo)}</h3>
+        ${a.resumo?`<p>${esc(a.resumo)}</p>`:''}
+        ${(a.metricas||[]).length?`<div class="mini">${a.metricas.map(m=>`<span>${esc(m.nome)} <b>${esc(m.valor)}</b>${esc(m.unidade||'')}</span>`).join('')}</div>`:''}
+        ${a.arquivo_path?`<button class="txtlink" data-pdf="${esc(a.arquivo_path)}">Relatório em PDF ↗</button>`:''}
+      </div></div>`).join('')}`;
+    bindPdf(el);
+  },
+
+  recados() {
+    const el = $('#v-recados');
+    el.innerHTML = `<h2>Recados</h2><p class="lead">Orientações e avisos do seu fisioterapeuta.</p>` +
+      (S.recados.length ? S.recados.map(r => `<div class="card recado ${r.lido_em?'':'novo'}">
+          <div class="muted" style="margin-bottom:6px">${esc(fmtDate(r.criado_em,{day:'2-digit',month:'short'}))} · ${fmtTime(r.criado_em)}</div>
+          <p>${esc(r.texto)}</p></div>`).join('')
+        : `<div class="card empty">Nenhum recado por enquanto.</div>`) +
+      `<a class="btn wide" href="${waLink('Olá, Isack! Sobre o recado na área do paciente: ')}" target="_blank" rel="noopener">Responder pelo WhatsApp</a>`;
+    // marca como lidos ao abrir
+    const unread = S.recados.filter(r => !r.lido_em);
+    if (unread.length) {
+      Promise.all(unread.map(r => api.markRead(r.id))).catch(()=>{});
+      const now = new Date().toISOString(); unread.forEach(r => r.lido_em = now);
+      setTimeout(updateBadge, 0);
+    }
+  },
+
+  agenda() {
+    const el = $('#v-agenda'), now = new Date();
+    const fut = S.agendamentos.filter(a => new Date(a.inicio) >= now);
+    const past = S.agendamentos.filter(a => new Date(a.inicio) < now).reverse().slice(0,10);
+    const ST = {agendado:['Agendado',''],confirmado:['Confirmado','ok'],realizado:['Realizado',''],cancelado:['Cancelado','amber'],faltou:['Falta','amber']};
+    const item = (a, cls='') => `<div class="card ag ${cls}">
+      <div class="ag-date"><div class="d">${fmtDate(a.inicio,{day:'2-digit'})}</div><div class="m">${fmtDate(a.inicio,{month:'short'}).replace('.','')}</div></div>
+      <div style="flex:1;min-width:0"><div class="row"><h3>${esc(a.tipo||'Atendimento')}</h3><span class="pill ${ST[a.status]?.[1]||''}">${ST[a.status]?.[0]||esc(a.status)}</span></div>
+      <p class="muted">${esc(fmtDate(a.inicio,{weekday:'long'}))} · ${fmtTime(a.inicio)}${a.fim?' – '+fmtTime(a.fim):''}</p>
+      ${a.local?`<p class="muted">${esc(a.local)}</p>`:''}</div></div>`;
+    el.innerHTML = `<h2>Sua <span>agenda</span></h2><p class="lead">Seus horários marcados.</p>
+      ${fut.length ? fut.map(a=>item(a)).join('') : `<div class="card empty">Nenhum horário futuro marcado.</div>`}
+      <a class="btn wide" href="${waLink('Olá, Isack! Gostaria de agendar/remarcar um horário.')}" target="_blank" rel="noopener">Agendar ou remarcar pelo WhatsApp</a>
+      ${past.length ? `<div class="section-t">Anteriores</div>${past.map(a=>item(a,'past')).join('')}` : ''}`;
+  },
+
+  perfil() {
+    const p = S.paciente;
+    $('#v-perfil').innerHTML = `<h2>Meus <span>dados</span></h2><p class="lead">Mantenha seu telefone atualizado.</p>
+      <div class="card">
+        <label>Nome</label><p>${esc(p.nome)}</p>
+        <label>E-mail</label><p>${esc(p.email||'—')}</p>
+        <form id="fTel"><label for="pTel">Telefone (WhatsApp)</label>
+          <div class="row"><input id="pTel" type="tel" value="${esc(p.telefone||'')}"><button class="btn btn-ghost btn-sm" type="submit">Salvar</button></div></form>
+        <div id="telMsg"></div>
+      </div>
+      <div class="card">
+        <form id="fPass"><h3>Alterar senha</h3>
+          <label for="pPass">Nova senha</label><input id="pPass" type="password" minlength="8" autocomplete="new-password" required>
+          <button class="btn btn-ghost btn-sm" style="margin-top:12px" type="submit">Alterar senha</button></form>
+        <div id="passMsg"></div>
+      </div>
+      <p class="muted" style="margin:6px 0 18px"><a href="#" data-open="termos">Termo de uso e privacidade</a> · Para pedir a exclusão dos seus dados, fale comigo pelo WhatsApp.</p>
+      <button class="btn wide" id="logout">${DEMO?'Sair da demonstração':'Sair'}</button>`;
+    $('#fTel').addEventListener('submit', async e => {
+      e.preventDefault(); const t = $('#pTel').value.trim();
+      try { await api.updatePhone(t); p.telefone = t; $('#telMsg').innerHTML = '<div class="msg ok">Telefone atualizado.</div>'; }
+      catch { $('#telMsg').innerHTML = '<div class="msg err">Não foi possível salvar.</div>'; }
+    });
+    $('#fPass').addEventListener('submit', async e => {
+      e.preventDefault(); if (DEMO) return;
+      const {error} = await sb.auth.updateUser({password:$('#pPass').value});
+      $('#passMsg').innerHTML = error ? `<div class="msg err">${esc(translateErr(error))}</div>` : '<div class="msg ok">Senha alterada.</div>';
+    });
+    $('#logout').onclick = () => DEMO ? (location.href = location.pathname) : sb.auth.signOut();
+  }
+};
+
+function alertBox(t) {
+  const d = document.createElement('div'); d.className = 'msg err';
+  d.style.cssText = 'position:fixed;left:16px;right:16px;bottom:calc(84px + var(--safe-b));z-index:60;max-width:520px;margin:0 auto';
+  d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 3500);
+}
+
+if (DEMO) start();
+</script>
+</body>
+</html>
