@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Área do paciente · Isack Nícholas Fisioterapia</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#8D9397">
-<link rel="preload" href="fonts/kaluk-sans-300.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/kaluk-sans-700.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="theme-color" content="#F1F2F0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @font-face{font-family:'Kaluk Sans';src:url(fonts/kaluk-sans-300.woff2) format('woff2');font-weight:300;font-display:swap}
@@ -15,356 +13,260 @@
 @font-face{font-family:'Kaluk Sans';src:url(fonts/kaluk-sans-500.woff2) format('woff2');font-weight:500;font-display:swap}
 @font-face{font-family:'Kaluk Sans';src:url(fonts/kaluk-sans-700.woff2) format('woff2');font-weight:700;font-display:swap}
 
-/* Identidade da nova home: o cinza da foto, papel claro, tinta, Kaluk Sans com contraste 700/300 */
+/* Pensado primeiro para o celular: uma coluna, pouca coisa por tela, muito respiro.
+   Mesma família da home (Kaluk Sans, papel claro, tinta, cinza da foto só como detalhe). */
 :root{
-  --stone:#8D9397; --stone-deep:#7F868A; --paper:#F1F2F0; --sheet:#FAFAF8; --white:#FFFFFF;
-  --ink:#121517; --ink-soft:#2C3235; --muted:#5E666A; --line:rgba(18,21,23,.13); --line-2:rgba(18,21,23,.32);
+  --paper:#F1F2F0; --sheet:#FAFAF8; --stone:#8D9397; --ink:#121517; --soft:#2C3235; --muted:#6B7276;
+  --line:rgba(18,21,23,.10); --line-2:rgba(18,21,23,.28); --white:#fff;
   --font:'Kaluk Sans','Futura','Century Gothic',system-ui,sans-serif;
+  --pad:22px; --sb:env(safe-area-inset-bottom,0px); --st:env(safe-area-inset-top,0px);
   --ease:cubic-bezier(.2,.7,.1,1);
-  --gut:clamp(18px,4vw,56px);
-  --sb:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{overflow-x:hidden}
-body{font-family:var(--font);font-size:16px;line-height:1.55;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
-a{color:inherit}
-button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+body{font-family:var(--font);font-size:16px;line-height:1.5;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:inherit}
 .hidden{display:none!important}
-:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px}
-.brand{font-weight:700;font-size:.9rem;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;text-decoration:none}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
+.wrap{max-width:520px;margin:0 auto;padding:0 var(--pad)}
+.brand{font-weight:700;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase}
 
-/* botões: os mesmos da home */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap;font-size:.76rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:14px 24px;border:1.5px solid var(--ink);border-radius:999px;color:var(--ink);text-decoration:none;transition:background .3s,color .3s}
-.btn:hover{background:var(--ink);color:var(--white)}
-.btn.solid{background:var(--ink);color:var(--white)}
-.btn.solid:hover{background:transparent;color:var(--ink)}
-.btn:disabled{opacity:.5;cursor:wait}
-.btn.sm{padding:9px 16px;font-size:.68rem}
-.txt-link{font-weight:300;color:var(--ink-soft);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;font-size:.95rem;font-weight:500;padding:15px 20px;border-radius:999px;background:var(--ink);color:var(--white);transition:opacity .2s}
+.btn:active{opacity:.8}
+.btn:disabled{opacity:.45}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.link{color:var(--muted);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 
-/* ===================== ENTRADA ===================== */
-.auth{min-height:100vh;min-height:100svh;background:var(--stone);display:grid;grid-template-rows:auto 1fr auto;padding:calc(22px + env(safe-area-inset-top,0px)) var(--gut) calc(22px + var(--sb))}
-.auth-top{display:flex;justify-content:space-between;align-items:center}
-.auth-top a.back{font-size:.9rem;font-weight:300;text-decoration:none;color:var(--ink-soft)}
-.auth-main{display:grid;align-items:center;gap:clamp(36px,6vw,90px);padding:clamp(40px,8vh,90px) 0 30px}
-@media (min-width:900px){.auth-main{grid-template-columns:1.1fr minmax(340px,420px)}}
-.auth h1{font-weight:700;font-size:clamp(3.4rem,10vw,7.6rem);line-height:.88;letter-spacing:-.045em}
-.auth h1 span{display:block;font-weight:300;color:var(--white)}
-.auth .lede{margin-top:26px;max-width:32ch;font-size:1.08rem;font-weight:300;color:var(--ink-soft);line-height:1.55}
-.auth-form{width:100%}
-.switch{display:flex;gap:26px;margin-bottom:6px}
-.switch button{font-size:1.25rem;font-weight:300;color:var(--ink-soft);padding:4px 0;letter-spacing:-.01em}
-.switch button.on{font-weight:700;color:var(--ink)}
-.field{display:block;margin-top:22px}
-.field span{display:block;font-size:.84rem;color:var(--ink-soft);margin-bottom:2px}
-.field input{width:100%;background:transparent;border:0;border-bottom:1.5px solid rgba(18,21,23,.4);border-radius:0;padding:9px 0 10px;font:inherit;font-size:1.15rem;color:var(--ink);transition:border-color .3s}
-.field input::placeholder{color:rgba(18,21,23,.38)}
+/* ---------- entrada ---------- */
+.auth{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;padding:calc(24px + var(--st)) 0 calc(24px + var(--sb))}
+.auth .wrap{width:100%}
+.auth-head{display:flex;justify-content:space-between;align-items:center}
+.auth-head a:last-child{font-size:.9rem;color:var(--muted)}
+.auth-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding-top:48px;padding-bottom:24px}
+.auth h1{font-size:2.1rem;font-weight:300;line-height:1.1;letter-spacing:-.03em}
+.auth h1 b{font-weight:700}
+.auth .lede{margin-top:10px;color:var(--muted)}
+.tabs2{display:flex;gap:6px;margin:36px 0 8px;background:rgba(18,21,23,.05);padding:4px;border-radius:999px}
+.tabs2 button{flex:1;text-align:center;padding:10px;border-radius:999px;font-size:.92rem;color:var(--muted)}
+.tabs2 button.on{background:var(--sheet);color:var(--ink);font-weight:500;box-shadow:0 1px 2px rgba(18,21,23,.08)}
+.field{display:block;margin-top:18px}
+.field span{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+.field input{width:100%;font:inherit;font-size:1.05rem;color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:14px 16px;transition:border-color .2s}
 .field input:focus{outline:none;border-color:var(--ink)}
-.field input.code{font-size:1.6rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase}
-.auth .btn.solid{width:100%;margin-top:30px;padding:16px}
-.auth .hint{margin-top:10px;font-size:.88rem;font-weight:300;color:var(--ink-soft)}
-.auth .check{display:flex;gap:12px;align-items:flex-start;margin-top:22px;font-size:.9rem;font-weight:300;color:var(--ink-soft)}
+.field input.code{text-align:center;letter-spacing:.3em;text-transform:uppercase;font-size:1.3rem;font-weight:500}
+.auth form .btn{margin-top:26px}
+.auth .hint{margin-top:10px;font-size:.9rem;color:var(--muted)}
+.auth .row{margin-top:18px;text-align:center;font-size:.92rem}
+.auth .check{display:flex;gap:12px;align-items:flex-start;margin-top:20px;font-size:.9rem;color:var(--muted)}
 .auth .check input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:var(--ink)}
-.auth .below{display:flex;justify-content:space-between;gap:16px;margin-top:18px;font-size:.9rem}
-.hello{margin-top:18px;font-size:1.3rem;font-weight:300;line-height:1.3}
+.hello{margin-top:6px;font-size:1.15rem;font-weight:300}
 .hello b{font-weight:700}
-.note{margin-top:18px;font-size:.92rem;line-height:1.45;padding:12px 16px;border-radius:14px}
-.note.err{background:rgba(255,255,255,.55);color:#6B2E16}
-.note.ok{background:rgba(255,255,255,.55);color:var(--ink)}
-.auth-foot{font-size:.84rem;font-weight:300;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.note{margin-top:16px;font-size:.92rem;padding:12px 14px;border-radius:14px;background:var(--sheet);border:1px solid var(--line)}
+.note.err{color:#7A3418}
+.auth-foot{text-align:center;font-size:.88rem;color:var(--muted)}
 
-/* ===================== APP ===================== */
-.shell{min-height:100vh}
-.mtop{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) var(--gut) 14px;background:rgba(241,242,240,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.me{width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--white);font-weight:700;font-size:.76rem;letter-spacing:.06em}
-.side{display:none}
-main{padding:8px var(--gut) calc(120px + var(--sb));max-width:1040px}
+/* ---------- app ---------- */
+.top{position:sticky;top:0;z-index:20;background:rgba(241,242,240,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;padding-top:calc(14px + var(--st));padding-bottom:12px}
+.me{width:34px;height:34px;border-radius:50%;background:var(--stone);color:var(--white);font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.demo{font-size:.75rem;color:var(--muted);margin-left:auto;margin-right:12px}
+main{padding-bottom:calc(96px + var(--sb))}
 
-/* dock no celular */
-.dock{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + var(--sb));max-width:480px;margin:0 auto;background:var(--ink);border-radius:999px;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;box-shadow:0 14px 40px rgba(18,21,23,.28)}
-.dock button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;border-radius:999px;color:rgba(255,255,255,.55);font-size:.66rem;font-weight:500;transition:background .3s,color .3s}
-.dock svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.5}
-.dock button.on{background:rgba(255,255,255,.12);color:var(--white)}
-.dock .dot{position:absolute;top:7px;left:calc(50% + 7px);width:7px;height:7px;border-radius:50%;background:var(--stone);box-shadow:0 0 0 2px var(--ink)}
+.nav{position:fixed;z-index:30;left:0;right:0;bottom:0;background:rgba(250,250,248,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:var(--sb)}
+.nav .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.nav button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 9px;font-size:.68rem;color:var(--muted)}
+.nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.nav button.on{color:var(--ink)}
+.nav button.on svg{stroke-width:1.9}
+.nav .dot{position:absolute;top:8px;left:calc(50% + 8px);width:7px;height:7px;border-radius:50%;background:var(--ink)}
 
-@media (min-width:960px){
-  .mtop,.dock{display:none}
-  .shell{display:grid;grid-template-columns:280px 1fr}
-  .side{display:flex;flex-direction:column;position:sticky;top:0;height:100vh;padding:34px 34px 30px 40px;border-right:1px solid var(--line)}
-  .side nav{margin-top:auto;margin-bottom:auto;display:flex;flex-direction:column;gap:4px}
-  .side nav button{text-align:left;font-size:2rem;font-weight:300;letter-spacing:-.03em;line-height:1.25;color:var(--muted);display:flex;align-items:center;gap:12px;transition:color .25s,transform .45s var(--ease)}
-  .side nav button:hover{color:var(--ink);transform:translateX(6px)}
-  .side nav button.on{font-weight:700;color:var(--ink)}
-  .side nav .dot{width:8px;height:8px;border-radius:50%;background:var(--ink)}
-  .side .who{font-size:.92rem;line-height:1.4}
-  .side .who b{display:block;font-weight:500}
-  .side .who button{font-weight:300;color:var(--muted);text-decoration:underline;text-underline-offset:3px;margin-top:6px;margin-right:14px}
-  main{padding:44px clamp(36px,5vw,80px) 90px}
-}
+.view{padding-top:18px}
+.view:not(.hidden){animation:in .4s var(--ease)}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view:not(.hidden){animation:none}}
 
-/* ===================== TIPOGRAFIA DAS PÁGINAS ===================== */
-.page-h{font-weight:700;font-size:clamp(2.7rem,7vw,5rem);line-height:.92;letter-spacing:-.045em}
-.page-h span{font-weight:300}
-.page-lede{margin-top:16px;max-width:46ch;font-size:1.05rem;font-weight:300;color:var(--muted)}
-.sec{margin-top:clamp(44px,6vw,72px)}
-.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.sec-h h2{font-size:1.5rem;font-weight:500;letter-spacing:-.02em}
-.sec-h .aside{font-size:.95rem;font-weight:300;color:var(--muted)}
-.sec-h a,.sec-h button.more{font-size:.95rem;font-weight:300;color:var(--ink-soft);text-decoration:underline;text-underline-offset:4px}
-.muted{color:var(--muted);font-weight:300}
-.empty{padding:28px 0;font-size:1.05rem;font-weight:300;color:var(--muted);max-width:44ch}
+h1.t{font-size:2rem;font-weight:300;line-height:1.1;letter-spacing:-.03em}
+h1.t b{font-weight:700}
+.sub{margin-top:8px;color:var(--muted)}
+.block{margin-top:40px}
+.bh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.bh h2{font-size:1.05rem;font-weight:500}
+.bh span,.bh button{font-size:.9rem;color:var(--muted)}
+.empty{padding:18px 0;color:var(--muted)}
+.muted{color:var(--muted)}
 
-/* ===================== INÍCIO ===================== */
-.hero{background:var(--stone);border-radius:clamp(26px,3.6vw,48px) clamp(26px,3.6vw,48px) clamp(26px,3.6vw,48px) 6px;padding:clamp(28px,4.5vw,60px);margin-top:8px;position:relative;overflow:hidden}
-.hero h1{font-weight:700;font-size:clamp(3rem,9vw,6.4rem);line-height:.88;letter-spacing:-.045em}
-.hero h1 span{display:block;font-weight:300;color:var(--white)}
-.hero .next{margin-top:clamp(30px,5vw,56px);padding-top:20px;border-top:1px solid rgba(18,21,23,.22);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:18px}
-.hero .next p{font-size:clamp(1.1rem,2.2vw,1.45rem);font-weight:300;line-height:1.35;max-width:30ch;color:var(--ink)}
-.hero .next p b{font-weight:700}
-.hero .next small{display:block;margin-top:6px;font-size:.9rem;color:var(--ink-soft)}
-.hero .btn{border-color:var(--ink)}
+/* próxima sessão */
+.next{display:flex;gap:14px;align-items:center;margin-top:22px;padding:14px 16px;background:var(--sheet);border-radius:16px}
+.next svg{width:22px;height:22px;flex:none;stroke:var(--ink);fill:none;stroke-width:1.4}
+.next p{font-size:.98rem;line-height:1.35}
+.next p small{display:block;color:var(--muted);font-size:.86rem}
 
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:18px 0 6px;max-width:420px}
-.wd{text-align:center;font-size:.78rem;color:var(--muted)}
-.wd i{display:block;margin:6px auto 0;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);font-style:normal;line-height:28px;font-size:.82rem;color:var(--ink-soft)}
-.wd.done i{background:var(--ink);border-color:var(--ink);color:var(--white)}
-.wd.today i{box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--ink)}
-
-.routine{list-style:none}
-.routine li{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
-.tick{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line-2);display:flex;align-items:center;justify-content:center;transition:background .25s,border-color .25s,transform .35s var(--ease)}
-.tick svg{width:15px;height:15px;stroke:var(--white);stroke-width:2.4;fill:none;opacity:0;transition:opacity .2s}
-.tick:hover{border-color:var(--ink)}
-.tick.on{background:var(--ink);border-color:var(--ink)}
+/* lista com marcação */
+.list{list-style:none}
+.list li{border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.item{display:flex;gap:14px;align-items:center;padding:15px 0;width:100%}
+.item .tx{flex:1;min-width:0}
+.item .nm{font-size:1.02rem;line-height:1.3}
+.item .ds{font-size:.88rem;color:var(--muted);margin-top:2px}
+.item .chev{width:18px;height:18px;flex:none;stroke:var(--muted);fill:none;stroke-width:1.5;transition:transform .3s var(--ease)}
+.tick{width:30px;height:30px;flex:none;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line-2);display:flex;align-items:center;justify-content:center;transition:background .2s,box-shadow .2s}
+.tick svg{width:14px;height:14px;stroke:var(--white);stroke-width:2.4;fill:none;opacity:0}
+.tick.on{background:var(--ink);box-shadow:none}
 .tick.on svg{opacity:1}
-.tick:active{transform:scale(.88)}
-.routine .nm{font-size:1.12rem;font-weight:500;letter-spacing:-.01em;line-height:1.25}
-.routine .ds{font-size:.92rem;font-weight:300;color:var(--muted);margin-top:2px}
-.routine li.is-done .nm{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
-.routine .open{font-size:.88rem;font-weight:300;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.is-done .nm{color:var(--muted)}
+.progress{height:3px;background:var(--line);border-radius:3px;margin:4px 0 6px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--ink);border-radius:3px;transition:width .5s var(--ease)}
 
-.pair{display:grid;gap:clamp(44px,6vw,72px);margin-top:clamp(44px,6vw,72px)}
-.pair .sec{margin-top:0}
-@media (min-width:760px){.pair{grid-template-columns:1fr 1fr}}
-.letter{padding-top:18px}
-.letter blockquote{font-size:clamp(1.25rem,2.2vw,1.55rem);font-weight:300;line-height:1.38;letter-spacing:-.01em}
-.letter .from{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:.9rem;color:var(--muted);font-weight:300}
-.letter .from b{color:var(--ink);font-weight:500}
-.av{width:30px;height:30px;border-radius:50%;background:var(--stone);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;letter-spacing:.04em;flex:none}
+/* aviso de recado */
+.notice{display:flex;align-items:center;gap:12px;margin-top:40px;padding:14px 16px;border-radius:16px;box-shadow:inset 0 0 0 1px var(--line)}
+.notice .av{width:30px;height:30px}
+.notice p{flex:1;font-size:.95rem}
+.notice svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.5}
+.av{border-radius:50%;background:var(--stone);color:var(--white);font-size:.66rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
 
-.deltas{list-style:none}
-.deltas li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line)}
-.deltas .n{font-size:1rem;font-weight:300}
-.deltas .v{font-size:1.5rem;font-weight:700;letter-spacing:-.03em;white-space:nowrap}
-.deltas .v s{text-decoration:none;font-weight:300;color:var(--muted)}
-.deltas .v small{font-size:.85rem;font-weight:300;color:var(--muted);margin-left:2px}
-
-.talk{margin-top:clamp(44px,6vw,72px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;padding-top:24px;border-top:1px solid var(--line)}
-.talk p{font-size:1.15rem;font-weight:300;max-width:34ch}
-
-/* ===================== EXERCÍCIOS ===================== */
-.plan{margin-top:28px;max-width:62ch}
-.plan h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:500;letter-spacing:-.025em;line-height:1.15}
-.plan p{margin-top:10px;font-size:1.02rem;font-weight:300;color:var(--ink-soft)}
-.plan p b{font-weight:500;color:var(--ink)}
-.ex{display:grid;gap:22px;padding:clamp(28px,4vw,44px) 0;border-bottom:1px solid var(--line)}
-.ex:first-of-type{border-top:1px solid var(--line);margin-top:22px}
-@media (min-width:820px){.ex{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(28px,4vw,52px);align-items:start}}
-.vid{position:relative;aspect-ratio:16/10;border-radius:22px 22px 22px 4px;overflow:hidden;background:var(--stone) center/cover no-repeat;display:flex;align-items:center;justify-content:center;width:100%}
+/* exercício aberto */
+.ex-open .chev{transform:rotate(90deg)}
+.ex-body{padding:4px 0 22px}
+.vid{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#DDE0DE center/cover no-repeat;display:flex;align-items:center;justify-content:center;width:100%;color:var(--muted);font-size:.9rem}
 .vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.vid .play{width:68px;height:68px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center;transition:transform .45s var(--ease)}
-.vid:hover .play{transform:scale(1.08)}
-.vid .play svg{width:22px;height:22px;fill:var(--ink);margin-left:4px}
-.vid.none{flex-direction:column;gap:6px;color:var(--ink-soft);font-weight:300;font-size:.95rem}
-.vid.none b{font-weight:700;font-size:3.6rem;line-height:1;letter-spacing:-.05em;color:rgba(255,255,255,.75)}
-.ex-head{display:flex;gap:16px;align-items:baseline}
-.ex-head .no{font-size:2.6rem;font-weight:300;line-height:.9;letter-spacing:-.05em;color:var(--muted)}
-.ex-head h3{font-size:clamp(1.4rem,2.6vw,1.85rem);font-weight:500;letter-spacing:-.025em;line-height:1.12}
-.dose{margin-top:14px;font-size:1.1rem;font-weight:300;line-height:1.5}
-.dose b{font-weight:700}
-.ex p.how{margin-top:14px;font-weight:300;color:var(--ink-soft);max-width:52ch}
-.ex p.tipline{margin-top:10px;font-weight:300;color:var(--ink-soft);max-width:52ch}
-.ex p.tipline b{font-weight:500;color:var(--ink)}
-.ex p.mine{margin-top:12px;padding:12px 16px;background:var(--sheet);border-radius:14px 14px 14px 3px;font-weight:300;max-width:52ch}
-.ex p.mine b{font-weight:500}
-.ex .act{margin-top:22px;display:flex;align-items:center;gap:14px}
-.ex .act .btn.on{background:var(--ink);color:var(--white)}
-.ex .act span{font-size:.9rem;font-weight:300;color:var(--muted)}
+.vid .play{width:54px;height:54px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(18,21,23,.12)}
+.vid .play svg{width:18px;height:18px;fill:var(--ink);margin-left:3px}
+.ex-body .dose{margin-top:16px;font-size:1rem}
+.ex-body .dose b{font-weight:700}
+.ex-body p{margin-top:10px;font-size:.95rem;color:var(--soft);line-height:1.5}
+.ex-body p b{font-weight:500;color:var(--ink)}
+.ex-body .mine{padding:12px 14px;background:var(--sheet);border-radius:12px}
+.ex-body .btn{margin-top:18px}
+.plan{margin-top:14px;font-size:.95rem;color:var(--soft)}
+.plan b{font-weight:500;color:var(--ink)}
+.no{width:30px;height:30px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.no.on{background:var(--ink);color:var(--white);box-shadow:none}
 
-/* ===================== AVALIAÇÕES ===================== */
-.evo{display:grid;gap:0;margin-top:6px}
-@media (min-width:760px){.evo{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 36px}}
-.evo-i{padding:20px 0;border-bottom:1px solid var(--line)}
-.evo-i .n{font-size:.98rem;font-weight:300;color:var(--ink-soft)}
-.evo-i .v{margin-top:4px;font-size:2.4rem;font-weight:700;letter-spacing:-.045em;line-height:1}
-.evo-i .v s{text-decoration:none;font-weight:300;color:var(--muted)}
-.evo-i .v small{font-size:.95rem;font-weight:300;color:var(--muted);letter-spacing:0;margin-left:3px}
-.evo-i svg{display:block;width:100%;max-width:240px;height:42px;margin-top:12px}
+/* evolução */
+.metric{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line)}
+.metric:last-child{border-bottom:0}
+.metric .v{font-size:1.15rem;white-space:nowrap}
+.metric .v s{text-decoration:none;color:var(--muted);font-weight:300}
+.metric .v b{font-weight:700}
+.metric .v small{font-size:.8rem;color:var(--muted);margin-left:2px}
+.av-body{padding:0 0 20px}
+.av-body p{font-size:.95rem;color:var(--soft)}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:14px}
+.nums div{font-size:.84rem;color:var(--muted)}
+.nums b{display:block;font-size:1.1rem;font-weight:500;color:var(--ink)}
+.av-body .btn{margin-top:16px}
 
-.tl{list-style:none;margin-top:8px}
-.tl li{display:grid;grid-template-columns:1fr;gap:6px;padding:28px 0;border-bottom:1px solid var(--line)}
-@media (min-width:760px){.tl li{grid-template-columns:150px 1fr;gap:32px}}
-.tl time{font-size:1rem;font-weight:300;color:var(--muted)}
-.tl time b{display:block;font-size:2rem;font-weight:700;letter-spacing:-.04em;color:var(--ink);line-height:1}
-.tl .kind{font-size:.92rem;font-weight:500;color:var(--ink-soft)}
-.tl h3{font-size:1.5rem;font-weight:500;letter-spacing:-.02em;line-height:1.2;margin-top:2px}
-.tl p{margin-top:10px;font-weight:300;max-width:58ch}
-.tl .nums{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:16px}
-.tl .nums div{font-size:.92rem;font-weight:300;color:var(--muted)}
-.tl .nums b{display:block;font-size:1.35rem;font-weight:700;letter-spacing:-.03em;color:var(--ink)}
-.tl .nums b small{font-size:.8rem;font-weight:300;color:var(--muted);margin-left:2px}
-.tl .btn{margin-top:18px}
+/* recados */
+.msg{padding:20px 0;border-bottom:1px solid var(--line)}
+.msg:last-child{border-bottom:0}
+.msg .from{display:flex;align-items:center;gap:10px;font-size:.88rem;color:var(--muted)}
+.msg .from .av{width:28px;height:28px}
+.msg .from b{font-weight:500;color:var(--ink)}
+.msg .new{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--ink)}
+.msg p{margin-top:10px;font-size:1.02rem;line-height:1.5;white-space:pre-wrap}
 
-/* ===================== RECADOS ===================== */
-.msgs{list-style:none;margin-top:30px}
-.msgs li{display:grid;grid-template-columns:auto 1fr;gap:16px;padding:26px 0;border-bottom:1px solid var(--line)}
-.msgs li:first-child{border-top:1px solid var(--line)}
-.msgs .av{width:40px;height:40px;font-size:.78rem}
-.msgs .meta{font-size:.9rem;font-weight:300;color:var(--muted);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.msgs .meta b{font-weight:500;color:var(--ink)}
-.msgs .new{font-size:.78rem;font-weight:500;background:var(--ink);color:var(--white);padding:2px 10px;border-radius:999px}
-.msgs p{margin-top:8px;font-size:clamp(1.12rem,2vw,1.3rem);font-weight:300;line-height:1.45;white-space:pre-wrap;max-width:56ch}
-.msgs li.unread p{font-weight:400}
+/* agenda */
+.appt{display:flex;gap:16px;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}
+.appt:last-child{border-bottom:0}
+.appt .d{width:44px;flex:none;text-align:center}
+.appt .d b{display:block;font-size:1.35rem;font-weight:500;line-height:1}
+.appt .d small{font-size:.75rem;color:var(--muted)}
+.appt .tx{flex:1}
+.appt .nm{font-size:1rem}
+.appt .ds{font-size:.88rem;color:var(--muted)}
+.appt .st{font-size:.82rem;color:var(--muted)}
+.appt.first{background:var(--sheet);border-radius:16px;padding:16px;border-bottom:0;margin-bottom:6px}
+.past .appt{opacity:.55}
 
-/* ===================== AGENDA ===================== */
-.soon{margin-top:30px;padding:clamp(26px,4vw,44px);background:var(--sheet);border-radius:clamp(22px,3vw,40px) clamp(22px,3vw,40px) clamp(22px,3vw,40px) 6px;display:grid;gap:20px}
-@media (min-width:700px){.soon{grid-template-columns:auto 1fr;align-items:center;gap:40px}}
-.soon .big{font-weight:700;font-size:clamp(4.5rem,12vw,7rem);line-height:.8;letter-spacing:-.06em}
-.soon .big span{display:block;font-size:.3em;font-weight:300;letter-spacing:-.02em;margin-top:10px;color:var(--muted)}
-.soon h3{font-size:1.6rem;font-weight:500;letter-spacing:-.02em}
-.soon p{font-weight:300;color:var(--ink-soft);margin-top:4px}
-.soon .state{margin-top:10px;font-size:.92rem;font-weight:500}
-.alist{list-style:none}
-.alist li{display:grid;grid-template-columns:70px 1fr auto;gap:16px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
-.alist .d{font-size:2rem;font-weight:700;letter-spacing:-.05em;line-height:.9}
-.alist .d small{display:block;font-size:.82rem;font-weight:300;letter-spacing:0;color:var(--muted);margin-top:4px}
-.alist h4{font-size:1.1rem;font-weight:500}
-.alist p{font-size:.92rem;font-weight:300;color:var(--muted)}
-.alist .st{font-size:.88rem;font-weight:300;color:var(--muted);text-align:right}
-.alist.past li{opacity:.6}
-
-/* ===================== MEUS DADOS ===================== */
-.form-block{max-width:520px;margin-top:30px}
-.form-block .field input{border-bottom-color:var(--line-2)}
-.form-block .field span{color:var(--muted)}
-.ro{margin-top:22px}
+/* meus dados */
+.ro{padding:14px 0;border-bottom:1px solid var(--line)}
 .ro span{display:block;font-size:.84rem;color:var(--muted)}
-.ro p{font-size:1.15rem;padding:9px 0 10px;border-bottom:1px solid var(--line)}
-.inline{display:flex;gap:12px;align-items:flex-end}
+.inline{display:flex;gap:10px;align-items:flex-end}
 .inline .field{flex:1}
-.flash{margin-top:10px;font-size:.92rem;font-weight:300}
+.inline .btn{width:auto;padding:14px 18px}
+.flash{margin-top:8px;font-size:.9rem;color:var(--muted)}
 
-.demo{display:inline-block;background:var(--ink);color:var(--white);font-size:.74rem;font-weight:500;padding:4px 12px;border-radius:999px;white-space:nowrap}
-.side .demo{margin-top:14px;align-self:flex-start}
-.mtop .demo{margin-left:auto;margin-right:10px}
-@media (max-width:599px){.routine .open{display:none}}
-.routine .nm button{font:inherit;text-align:left}
-.loader{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--stone);font-size:1.6rem;font-weight:300;color:var(--white);letter-spacing:-.02em}
-.toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(92px + var(--sb));background:var(--ink);color:var(--white);padding:12px 18px;border-radius:14px;font-size:.92rem;max-width:calc(100% - 32px)}
-.modal{position:fixed;inset:0;z-index:70;background:rgba(18,21,23,.45);display:flex;align-items:flex-end;justify-content:center}
-.modal-box{background:var(--paper);width:100%;max-width:580px;max-height:86vh;overflow:auto;border-radius:30px 30px 0 0;padding:30px 26px calc(26px + var(--sb))}
-@media (min-width:700px){.modal{align-items:center}.modal-box{border-radius:34px 34px 34px 6px}}
-.modal-box h3{font-size:1.9rem;font-weight:700;letter-spacing:-.035em;line-height:1;margin-bottom:18px}
-.modal-box p,.modal-box li{font-weight:300;color:var(--ink-soft);margin-bottom:10px}
+.toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(84px + var(--sb));background:var(--ink);color:var(--white);padding:11px 16px;border-radius:14px;font-size:.9rem;max-width:calc(100% - 32px)}
+.loader{min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.modal{position:fixed;inset:0;z-index:70;background:rgba(18,21,23,.4);display:flex;align-items:flex-end;justify-content:center}
+.modal-box{background:var(--paper);width:100%;max-width:520px;max-height:86vh;overflow:auto;border-radius:24px 24px 0 0;padding:26px var(--pad) calc(22px + var(--sb))}
+.modal-box h3{font-size:1.35rem;font-weight:500;margin-bottom:14px}
+.modal-box p,.modal-box li{font-size:.94rem;color:var(--soft);margin-bottom:10px}
 .modal-box b{font-weight:500;color:var(--ink)}
 .modal-box ul{padding-left:18px;margin-bottom:12px}
-
-/* um único movimento: a página entra quando você troca de seção */
-.view:not(.hidden){animation:enter .55s var(--ease)}
-@keyframes enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.view:not(.hidden){animation:none}*{transition:none!important}}
+@media (min-width:600px){.modal{align-items:center}.modal-box{border-radius:24px}}
 </style>
 </head>
 <body>
 
-
-<!-- ===================== ENTRADA ===================== -->
+<!-- ============ ENTRADA ============ -->
 <section id="auth" class="auth hidden">
-  <div class="auth-top">
+  <div class="wrap auth-head">
     <a class="brand" href="/">Isack Nícholas</a>
-    <a class="back" href="/">Voltar ao site</a>
+    <a href="/">Voltar ao site</a>
   </div>
+  <div class="wrap auth-body">
+    <h1>Área do<br><b>paciente</b></h1>
+    <p class="lede">Seus exercícios, avaliações e recados.</p>
 
-  <div class="auth-main">
-    <div>
-      <h1>Área do <span>paciente</span></h1>
-      <p class="lede">Seus exercícios, avaliações e recados do tratamento, sempre à mão.</p>
+    <div class="tabs2" id="authSeg">
+      <button data-auth="login" class="on">Entrar</button>
+      <button data-auth="first">Primeiro acesso</button>
     </div>
 
-    <div class="auth-form">
-      <div class="switch" id="authSeg">
-        <button data-auth="login" class="on">Entrar</button>
-        <button data-auth="first">Primeiro acesso</button>
-      </div>
+    <form id="fLogin">
+      <label class="field"><span>E-mail</span><input id="lEmail" type="email" autocomplete="email" required></label>
+      <label class="field"><span>Senha</span><input id="lPass" type="password" autocomplete="current-password" required></label>
+      <button class="btn" type="submit">Entrar</button>
+      <p class="row"><button class="link" type="button" data-auth="forgot">Esqueci minha senha</button></p>
+    </form>
 
-      <form id="fLogin">
-        <label class="field"><span>E-mail</span><input id="lEmail" type="email" autocomplete="email" required></label>
-        <label class="field"><span>Senha</span><input id="lPass" type="password" autocomplete="current-password" required></label>
-        <button class="btn solid" type="submit">Entrar</button>
-        <div class="below"><button class="txt-link" type="button" data-auth="forgot">Esqueci minha senha</button></div>
-      </form>
+    <form id="fCode" class="hidden">
+      <label class="field"><span>Código de acesso</span><input id="cCode" class="code" type="text" autocomplete="off" required></label>
+      <p class="hint">Você recebe o código do seu fisioterapeuta.</p>
+      <button class="btn" type="submit">Continuar</button>
+    </form>
 
-      <form id="fCode" class="hidden">
-        <label class="field"><span>Código de acesso</span><input id="cCode" class="code" type="text" autocomplete="off" placeholder="········" required></label>
-        <p class="hint">Você recebe o código do seu fisioterapeuta na primeira consulta.</p>
-        <button class="btn solid" type="submit">Continuar</button>
-      </form>
+    <form id="fSignup" class="hidden">
+      <p class="hello" id="helloName"></p>
+      <label class="field"><span>E-mail</span><input id="sEmail" type="email" autocomplete="email" required></label>
+      <label class="field"><span>WhatsApp</span><input id="sTel" type="tel" autocomplete="tel" placeholder="(34) 9 0000-0000"></label>
+      <label class="field"><span>Crie uma senha</span><input id="sPass" type="password" autocomplete="new-password" minlength="8" required placeholder="Pelo menos 8 caracteres"></label>
+      <label class="field"><span>Repita a senha</span><input id="sPass2" type="password" autocomplete="new-password" minlength="8" required></label>
+      <label class="check"><input id="sTerms" type="checkbox" required>
+        <span>Li o <a href="#" class="link" data-open="termos">termo de privacidade</a> e autorizo o uso dos meus dados no meu acompanhamento.</span></label>
+      <button class="btn" type="submit">Criar meu acesso</button>
+      <p class="row"><button class="link" type="button" data-auth="first">Usar outro código</button></p>
+    </form>
 
-      <form id="fSignup" class="hidden">
-        <p class="hello" id="helloName"></p>
-        <label class="field"><span>E-mail</span><input id="sEmail" type="email" autocomplete="email" required></label>
-        <label class="field"><span>WhatsApp</span><input id="sTel" type="tel" autocomplete="tel" placeholder="(34) 9 0000-0000"></label>
-        <label class="field"><span>Crie uma senha</span><input id="sPass" type="password" autocomplete="new-password" minlength="8" required placeholder="Pelo menos 8 caracteres"></label>
-        <label class="field"><span>Repita a senha</span><input id="sPass2" type="password" autocomplete="new-password" minlength="8" required></label>
-        <label class="check"><input id="sTerms" type="checkbox" required>
-          <span>Li o <a href="#" class="txt-link" data-open="termos">termo de uso e privacidade</a> e autorizo o uso dos meus dados de saúde no meu acompanhamento.</span></label>
-        <button class="btn solid" type="submit">Criar meu acesso</button>
-        <div class="below"><button class="txt-link" type="button" data-auth="first">Usar outro código</button></div>
-      </form>
+    <form id="fForgot" class="hidden">
+      <p class="hello">Vamos criar uma nova senha.</p>
+      <label class="field"><span>E-mail do cadastro</span><input id="fEmail" type="email" autocomplete="email" required></label>
+      <button class="btn" type="submit">Enviar link por e-mail</button>
+      <p class="row"><button class="link" type="button" data-auth="login">Voltar</button></p>
+    </form>
 
-      <form id="fForgot" class="hidden">
-        <p class="hello">Vamos criar uma nova senha.</p>
-        <label class="field"><span>E-mail do cadastro</span><input id="fEmail" type="email" autocomplete="email" required></label>
-        <button class="btn solid" type="submit">Enviar link por e-mail</button>
-        <div class="below"><button class="txt-link" type="button" data-auth="login">Voltar para entrar</button></div>
-      </form>
+    <form id="fNewPass" class="hidden">
+      <p class="hello">Escolha sua nova senha.</p>
+      <label class="field"><span>Nova senha</span><input id="nPass" type="password" autocomplete="new-password" minlength="8" required></label>
+      <button class="btn" type="submit">Salvar nova senha</button>
+    </form>
 
-      <form id="fNewPass" class="hidden">
-        <p class="hello">Escolha sua nova senha.</p>
-        <label class="field"><span>Nova senha</span><input id="nPass" type="password" autocomplete="new-password" minlength="8" required></label>
-        <button class="btn solid" type="submit">Salvar nova senha</button>
-      </form>
-
-      <div id="authMsg"></div>
-    </div>
+    <div id="authMsg"></div>
   </div>
-
-  <div class="auth-foot">
-    <span>Fisioterapia ortopédica e esportiva em Uberlândia</span>
-    <a class="txt-link" href="?demo">Ver uma demonstração</a>
-  </div>
+  <div class="wrap auth-foot"><a class="link" href="?demo">Ver uma demonstração</a></div>
 </section>
 
-<!-- ===================== APP ===================== -->
-<section id="app" class="shell hidden">
-  <aside class="side">
-    <a class="brand" href="/">Isack Nícholas</a>
-    <nav id="sideNav">
-      <button data-v="inicio">Início</button>
-      <button data-v="exercicios">Exercícios</button>
-      <button data-v="avaliacoes">Avaliações</button>
-      <button data-v="recados">Recados</button>
-      <button data-v="agenda">Agenda</button>
-    </nav>
-    <div class="who" id="who"></div>
-  </aside>
-
-  <header class="mtop">
+<!-- ============ APP ============ -->
+<section id="app" class="hidden">
+  <header class="top"><div class="wrap">
     <a class="brand" href="/">Isack Nícholas</a>
     <button class="me" id="avatarBtn" aria-label="Meus dados"></button>
-  </header>
+  </div></header>
 
-  <main>
+  <main class="wrap">
     <div class="view" id="v-inicio"></div>
     <div class="view hidden" id="v-exercicios"></div>
     <div class="view hidden" id="v-avaliacoes"></div>
@@ -373,30 +275,30 @@ main{padding:8px var(--gut) calc(120px + var(--sb));max-width:1040px}
     <div class="view hidden" id="v-perfil"></div>
   </main>
 
-  <nav class="dock" id="dock" aria-label="Seções">
+  <nav class="nav" aria-label="Seções"><div class="in" id="dock">
     <button data-v="inicio"><svg viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>Início</button>
     <button data-v="exercicios"><svg viewBox="0 0 24 24"><path d="M6.5 8v8M3.5 10v4M17.5 8v8M20.5 10v4M6.5 12h11"/></svg>Treino</button>
-    <button data-v="avaliacoes"><svg viewBox="0 0 24 24"><path d="M4 19l5-6 4 3 7-9"/></svg>Evolução</button>
-    <button data-v="recados"><svg viewBox="0 0 24 24"><path d="M4.5 5.5h15v10h-9l-4.5 4v-4h-1.5z"/></svg>Recados</button>
-    <button data-v="agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M8.5 3.5v3.5M15.5 3.5v3.5"/></svg>Agenda</button>
-  </nav>
+    <button data-v="avaliacoes"><svg viewBox="0 0 24 24"><path d="M4 18l5-5.5 4 3 7-8"/></svg>Evolução</button>
+    <button data-v="recados"><svg viewBox="0 0 24 24"><path d="M5 5.5h14v10h-8.5L6 19.5v-4H5z"/></svg>Recados</button>
+    <button data-v="agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14" rx="3"/><path d="M4 10h16M9 3.5v3.5M15 3.5v3.5"/></svg>Agenda</button>
+  </div></nav>
 </section>
 
-<div id="loader" class="loader">Um instante…</div>
+<div id="loader" class="loader">Carregando…</div>
 
 <div class="modal hidden" id="m-termos">
   <div class="modal-box">
-    <h3>Termo de uso e privacidade</h3>
-    <p>Esta área é um canal de acompanhamento entre você e seu fisioterapeuta, Isack Nícholas (Uberlândia, MG).</p>
+    <h3>Termo de privacidade</h3>
+    <p>Esta área é um canal entre você e seu fisioterapeuta, Isack Nícholas (Uberlândia, MG).</p>
     <ul>
-      <li><b>Quais dados:</b> nome, e-mail, telefone, avaliações, exercícios prescritos, recados e horários.</li>
-      <li><b>Para quê:</b> somente para o seu acompanhamento fisioterapêutico.</li>
-      <li><b>Quem vê:</b> você e seu fisioterapeuta. Nada é vendido ou repassado a terceiros.</li>
-      <li><b>Segurança:</b> acesso com senha pessoal; cada paciente vê apenas as próprias informações.</li>
-      <li><b>Seus direitos (LGPD):</b> peça acesso, correção ou exclusão dos seus dados pelo WhatsApp (34) 99139-6892 ou pelo e-mail nicholasalmeida.ft@gmail.com.</li>
-      <li>Esta área não substitui o atendimento. Se a dor aumentar muito ou algo piorar, fale comigo antes de continuar os exercícios.</li>
+      <li><b>Dados:</b> nome, e-mail, telefone, avaliações, exercícios, recados e horários.</li>
+      <li><b>Uso:</b> somente no seu acompanhamento fisioterapêutico.</li>
+      <li><b>Quem vê:</b> você e seu fisioterapeuta. Nada é repassado a terceiros.</li>
+      <li><b>Segurança:</b> acesso com senha; cada paciente vê só as próprias informações.</li>
+      <li><b>Seus direitos (LGPD):</b> peça acesso, correção ou exclusão pelo WhatsApp (34) 99139-6892 ou pelo e-mail nicholasalmeida.ft@gmail.com.</li>
+      <li>Esta área não substitui o atendimento. Se a dor aumentar muito, fale comigo antes de continuar os exercícios.</li>
     </ul>
-    <button class="btn solid" data-close>Fechar</button>
+    <button class="btn" data-close>Fechar</button>
   </div>
 </div>
 
@@ -580,7 +482,7 @@ async function start() {
     show('auth'); authMode('login');
     msg(eq ? 'Você entrou como fisioterapeuta. O painel do fisioterapeuta será a próxima etapa — por enquanto, use o modo demonstração para ver a área do paciente.'
            : 'Sua conta não está vinculada a um paciente. Fale com seu fisioterapeuta.', eq ? 'ok' : 'err');
-    $('#authMsg').insertAdjacentHTML('beforeend','<button class="txt-link" id="outBtn" style="margin-top:14px">Sair</button>');
+    $('#authMsg').insertAdjacentHTML('beforeend','<button class="link" id="outBtn" style="margin-top:14px">Sair</button>');
     $('#outBtn').onclick = () => sb.auth.signOut();
     return;
   }
@@ -598,13 +500,12 @@ if (!DEMO) {
 }
 
 
+
 function enterApp() {
   show('app');
-  if (DEMO && !$('.demo')) { $('.side .brand').insertAdjacentHTML('afterend','<span class="demo">Demonstração</span>'); $('#avatarBtn').insertAdjacentHTML('beforebegin','<span class="demo">Demonstração</span>'); }
   const ini = S.paciente.nome.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
   $('#avatarBtn').textContent = ini;
-  $('#who').innerHTML = `<b>${esc(S.paciente.nome)}</b><button data-v="perfil">Meus dados</button><button id="sideOut">Sair</button>`;
-  $('#sideOut').onclick = logout;
+  if (DEMO && !$('.demo')) $('#avatarBtn').insertAdjacentHTML('beforebegin','<span class="demo">Demonstração</span>');
   const h = location.hash.slice(1);
   go(['inicio','exercicios','avaliacoes','recados','agenda','perfil'].includes(h) ? h : 'inicio', false);
 }
@@ -618,19 +519,17 @@ window.addEventListener('hashchange', () => { const h = location.hash.slice(1); 
 function go(v, push=true) {
   currentView = v;
   $$('.view').forEach(x => x.classList.toggle('hidden', x.id !== 'v-'+v));
-  $$('#sideNav button, #dock button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $$('#dock button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   if (push) history.replaceState(null,'','#'+v);
   render[v]();
   marks();
   window.scrollTo({top:0});
 }
 function marks() {
-  const n = S.recados.some(r => !r.lido_em);
-  $$('#sideNav [data-v=recados], #dock [data-v=recados]').forEach(b => {
-    let d = b.querySelector('.dot');
-    if (n && !d) { d = document.createElement('span'); d.className = 'dot'; d.setAttribute('aria-label','recado novo'); b.appendChild(d); }
-    if (!n && d) d.remove();
-  });
+  const n = S.recados.some(r => !r.lido_em), b = $('#dock [data-v=recados]');
+  let d = b.querySelector('.dot');
+  if (n && !d) b.insertAdjacentHTML('beforeend','<span class="dot" aria-label="recado novo"></span>');
+  if (!n && d) d.remove();
 }
 
 /* ================= AJUDANTES ================= */
@@ -642,32 +541,22 @@ const D = s => typeof s==='string' && s.length===10 ? new Date(s+'T12:00:00-03:0
 const fmt = (d,o) => new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,...o}).format(D(d));
 const hhmm = d => fmt(d,{hour:'2-digit',minute:'2-digit'}).replace(':','h');
 const weekday = d => fmt(d,{weekday:'long'}).replace('-feira','');
-const dayMonth = d => fmt(d,{day:'numeric',month:'long'});
-const shortMonth = d => fmt(d,{month:'short'}).replace('.','');
+const shortDate = d => `${fmt(d,{day:'numeric'})} ${fmt(d,{month:'short'}).replace('.','')}`;
 function relDay(d) {
-  const a = isoOf(D(d)), t = todayISO(), y = isoOf(new Date(Date.now()-864e5)), tm = isoOf(new Date(Date.now()+864e5));
-  if (a===t) return 'hoje'; if (a===y) return 'ontem'; if (a===tm) return 'amanhã';
-  return `${weekday(d)}, ${dayMonth(d)}`;
+  const a = isoOf(D(d)), t = todayISO();
+  if (a===t) return 'hoje';
+  if (a===isoOf(new Date(Date.now()-864e5))) return 'ontem';
+  if (a===isoOf(new Date(Date.now()+864e5))) return 'amanhã';
+  return `${weekday(d)}, ${shortDate(d)}`;
 }
-function doseText(it) {
-  const p = [];
-  if (it.series && it.repeticoes) p.push(`<b>${esc(it.series)}</b> séries de <b>${esc(it.repeticoes)}</b>`);
-  else if (it.series) p.push(`<b>${esc(it.series)}</b> séries`);
-  else if (it.repeticoes) p.push(`<b>${esc(it.repeticoes)}</b>`);
+function doseText(it, html=true) {
+  const B = x => html ? `<b>${esc(x)}</b>` : esc(x), p = [];
+  if (it.series && it.repeticoes) p.push(`${B(it.series)} × ${B(it.repeticoes)}`);
+  else if (it.series) p.push(`${B(it.series)} séries`);
+  else if (it.repeticoes) p.push(B(it.repeticoes));
   if (it.carga) p.push(`carga ${esc(it.carga)}`);
-  if (it.descanso) p.push(`descanso de ${esc(it.descanso)}`);
-  if (it.frequencia) p.push(esc(it.frequencia));
+  if (it.descanso) p.push(`descanso ${esc(it.descanso)}`);
   return p.join(', ');
-}
-const plain = h => h.replace(/<[^>]+>/g,'');
-function weekStrip() {
-  const ids = new Set(items().map(i=>i.id)), out = [];
-  for (let i=6;i>=0;i--) {
-    const iso = isoOf(new Date(Date.now()-i*864e5)), dt = D(iso);
-    const done = S.execucoes.some(x => x.data===iso && ids.has(x.item_id));
-    out.push(`<div class="wd ${done?'done':''} ${i===0?'today':''}" title="${done?'Treinou':'Sem registro'}">${fmt(iso,{weekday:'short'}).replace('.','')}<i>${dt.getDate()}</i></div>`);
-  }
-  return `<div class="week" aria-label="Últimos 7 dias">${out.join('')}</div>`;
 }
 function metricSeries() {
   const chron = [...S.avaliacoes].sort((a,b)=>a.data.localeCompare(b.data));
@@ -677,102 +566,82 @@ function metricSeries() {
     return {n, u:pts[0]?.unidade||'', vals:pts.map(p=>Number(p.valor)).filter(v=>!isNaN(v))};
   }).filter(s => s.vals.length >= 2);
 }
-function spark(vals) {
-  const min = Math.min(...vals), max = Math.max(...vals), r = (max-min)||1, W=240, H=42;
-  const xy = vals.map((v,i) => [6+(i/(vals.length-1))*(W-12), H-6-((v-min)/r)*(H-12)]);
-  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${xy.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#121517" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>${xy.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===xy.length-1?4:2.5}" fill="${i===xy.length-1?'#121517':'#F1F2F0'}" stroke="#121517" stroke-width="1.5"/>`).join('')}</svg>`;
-}
-const tick = (id,on) => `<button class="tick ${on?'on':''}" data-done="${id}" aria-pressed="${on}" aria-label="${on?'Desmarcar':'Marcar como feito hoje'}"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></button>`;
+const ICON = {
+  check:'<svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  chev:'<svg class="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+  cal:'<svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14" rx="3"/><path d="M4 10h16M9 3.5v3.5M15 3.5v3.5"/></svg>',
+  play:'<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>'
+};
+const tick = (id,on) => `<button class="tick ${on?'on':''}" data-done="${id}" aria-pressed="${on}" aria-label="${on?'Desmarcar':'Marcar como feito hoje'}">${ICON.check}</button>`;
 async function toggleDone(id) {
   const on = !doneToday(id), d = todayISO();
   try {
     await api.setDone(id, on);
     if (on) S.execucoes.push({item_id:id, data:d}); else S.execucoes = S.execucoes.filter(x => !(x.item_id===id && x.data===d));
     render[currentView]();
-  } catch { toast('Não deu para salvar. Confira sua internet e tente de novo.'); }
+  } catch { toast('Não deu para salvar. Confira sua internet.'); }
 }
-function bindTicks(root) { root.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () => { b.disabled = true; toggleDone(b.dataset.done); })); }
-function toast(t) { const d = document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),3600); }
+function bindTicks(root) { root.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); b.disabled = true; toggleDone(b.dataset.done); })); }
+function toast(t) { const d = document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),3400); }
 const TIPO = {inicial:'Avaliação inicial', evolucao:'Evolução mensal', reavaliacao:'Reavaliação'};
+const openEx = new Set(), openAv = new Set();
 
 /* ================= TELAS ================= */
 const render = {
   inicio() {
     const n = S.agendamentos.find(a => new Date(a.inicio) > new Date() && a.status!=='cancelado');
-    const its = items(), doneN = its.filter(i=>doneToday(i.id)).length, rec = S.recados[0], ser = metricSeries();
+    const its = items(), doneN = its.filter(i=>doneToday(i.id)).length, unread = S.recados.filter(r=>!r.lido_em);
     const h = Number(new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'numeric',hour12:false}).format(new Date()));
-    const greet = h < 12 ? 'Bom dia,' : h < 18 ? 'Boa tarde,' : 'Boa noite,';
+    const greet = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
     const el = $('#v-inicio');
     el.innerHTML = `
-      <section class="hero">
-        <h1>${greet}<span>${esc(firstName())}</span></h1>
-        <div class="next">
-          ${n ? `<p>Sua próxima ${esc((n.tipo||'sessão').toLowerCase())} é <b>${relDay(n.inicio)}</b>, às <b>${hhmm(n.inicio)}</b>.<small>${esc(n.local||'')}</small></p>
-                 <button class="btn sm" data-v="agenda">Ver agenda</button>`
-              : `<p>Você não tem horário marcado.<small>Me chame no WhatsApp para agendar.</small></p>
-                 <a class="btn sm" href="${waLink('Olá, Isack! Quero agendar um horário.')}" target="_blank" rel="noopener">Agendar</a>`}
-        </div>
-      </section>
+      <h1 class="t">${greet},<br><b>${esc(firstName())}</b></h1>
 
-      <section class="sec">
-        <div class="sec-h"><h2>Treino de hoje</h2><span class="aside">${its.length ? `${doneN} de ${its.length} feitos` : ''}</span></div>
-        ${its.length ? `${weekStrip()}
-          <ul class="routine">${its.map(it => { const on = doneToday(it.id); return `
-            <li class="${on?'is-done':''}">${tick(it.id,on)}
-              <div><div class="nm"><button data-v="exercicios">${esc(it.exercicios?.nome)}</button></div><div class="ds">${plain(doseText(it))}</div></div>
-              <button class="open" data-v="exercicios">Ver vídeo</button></li>`; }).join('')}</ul>`
+      ${n ? `<button class="next" data-v="agenda" style="width:100%">${ICON.cal}<p>Próxima ${esc((n.tipo||'sessão').toLowerCase())} ${relDay(n.inicio)==='hoje'||relDay(n.inicio)==='amanhã'?relDay(n.inicio):'na '+relDay(n.inicio)}, às ${hhmm(n.inicio)}<small>${esc(n.local||'')}</small></p></button>` : ''}
+
+      <section class="block">
+        <div class="bh"><h2>Treino de hoje</h2>${its.length?`<span>${doneN} de ${its.length}</span>`:''}</div>
+        ${its.length ? `<div class="progress"><i style="width:${Math.round(doneN/its.length*100)}%"></i></div>
+          <ul class="list">${its.map(it => { const on = doneToday(it.id); return `<li class="${on?'is-done':''}"><div class="item">${tick(it.id,on)}
+            <button class="tx" data-ex="${it.id}"><div class="nm">${esc(it.exercicios?.nome)}</div><div class="ds">${doseText(it,false)}</div></button></div></li>`; }).join('')}</ul>`
           : `<p class="empty">Seus exercícios aparecem aqui depois da avaliação.</p>`}
       </section>
 
-      <div class="pair">
-        <section class="sec">
-          <div class="sec-h"><h2>Último recado</h2>${S.recados.length>1?`<button class="more" data-v="recados">Ver todos</button>`:''}</div>
-          ${rec ? `<div class="letter"><blockquote>${esc(rec.texto)}</blockquote>
-              <div class="from"><span class="av">IN</span><span><b>Isack</b>, ${relDay(rec.criado_em)}</span></div></div>`
-            : `<p class="empty">Quando eu deixar uma orientação, ela aparece aqui.</p>`}
-        </section>
-        <section class="sec">
-          <div class="sec-h"><h2>Sua evolução</h2>${S.avaliacoes.length?`<button class="more" data-v="avaliacoes">Avaliações</button>`:''}</div>
-          ${ser.length ? `<ul class="deltas">${ser.slice(0,3).map(s => `<li><span class="n">${esc(s.n)}</span>
-              <span class="v"><s>${s.vals[0]} →</s> ${s.vals[s.vals.length-1]}<small>${esc(s.u)}</small></span></li>`).join('')}</ul>
-              <p class="muted" style="margin-top:12px;font-size:.9rem">Da primeira avaliação até a mais recente.</p>`
-            : `<p class="empty">A comparação aparece a partir da sua segunda avaliação.</p>`}
-        </section>
-      </div>
-
-      <div class="talk">
-        <p>Dúvida sobre algum exercício ou sentiu algo diferente?</p>
-        <a class="btn" href="${waLink('Olá, Isack! Sou '+S.paciente.nome+' e tenho uma dúvida.')}" target="_blank" rel="noopener">Falar no WhatsApp</a>
-      </div>`;
+      ${unread.length ? `<button class="notice" data-v="recados" style="width:100%"><span class="av">IN</span><p>${unread.length===1?'Você tem um recado novo':`Você tem ${unread.length} recados novos`}</p>${ICON.chev.replace('class="chev"','')}</button>` : ''}`;
     bindTicks(el);
+    el.querySelectorAll('[data-ex]').forEach(b => b.addEventListener('click', () => { openEx.add(b.dataset.ex); go('exercicios'); }));
   },
 
   exercicios() {
     const el = $('#v-exercicios');
-    if (!S.prescricoes.length) { el.innerHTML = `<h1 class="page-h">Exercícios</h1><p class="empty">Você ainda não tem exercícios. Eles aparecem aqui depois da sua avaliação.</p>`; return; }
-    el.innerHTML = `<h1 class="page-h">Seus <span>exercícios</span></h1>
-      <p class="page-lede">Assista ao vídeo, faça na ordem e marque quando terminar. Assim eu acompanho sua semana.</p>` +
-      S.prescricoes.map(p => `
-        <div class="plan">
-          <h2>${esc(p.titulo)}</h2>
-          ${p.objetivo ? `<p><b>Objetivo:</b> ${esc(p.objetivo)}</p>` : ''}
-          ${p.observacoes ? `<p>${esc(p.observacoes)}</p>` : ''}
-          ${weekStrip()}
-        </div>
-        ${p.prescricao_itens.map((it,i) => { const e = it.exercicios||{}, on = doneToday(it.id); return `
-          <article class="ex">
-            ${e.youtube_id
-              ? `<button class="vid" style="background-image:url('https://i.ytimg.com/vi/${encodeURIComponent(e.youtube_id)}/hqdefault.jpg')" data-yt="${esc(e.youtube_id)}" aria-label="Assistir ao vídeo de ${esc(e.nome)}"><span class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span></button>`
-              : `<div class="vid none"><b>${i+1}</b>O vídeo deste exercício chega em breve</div>`}
-            <div>
-              <div class="ex-head"><span class="no">${i+1}</span><h3>${esc(e.nome)}</h3></div>
-              <p class="dose">${doseText(it)}.</p>
-              ${e.descricao ? `<p class="how">${esc(e.descricao)}</p>` : ''}
-              ${e.dicas ? `<p class="tipline"><b>Atenção:</b> ${esc(e.dicas)}</p>` : ''}
-              ${it.observacoes ? `<p class="mine"><b>Só para você:</b> ${esc(it.observacoes)}</p>` : ''}
-              <div class="act"><button class="btn ${on?'on':''}" data-done="${it.id}" aria-pressed="${on}">${on?'Feito hoje':'Marcar como feito'}</button>${on?'<span>Toque de novo para desmarcar</span>':''}</div>
-            </div>
-          </article>`; }).join('')}`).join('');
+    if (!S.prescricoes.length) { el.innerHTML = `<h1 class="t">Treino</h1><p class="empty">Você ainda não tem exercícios. Eles aparecem aqui depois da sua avaliação.</p>`; return; }
+    const its = items(), doneN = its.filter(i=>doneToday(i.id)).length;
+    el.innerHTML = S.prescricoes.map(p => `
+      <h1 class="t">Treino</h1>
+      <p class="sub">${esc(p.titulo)}</p>
+      ${p.observacoes ? `<p class="plan">${esc(p.observacoes)}</p>` : ''}
+      <section class="block">
+        <div class="bh"><h2>Exercícios</h2><span>${doneN} de ${its.length} hoje</span></div>
+        <ul class="list">${p.prescricao_itens.map((it,i) => { const e = it.exercicios||{}, on = doneToday(it.id), open = openEx.has(it.id); return `
+          <li class="${open?'ex-open':''} ${on?'is-done':''}">
+            <button class="item" data-toggle="${it.id}" aria-expanded="${open}">
+              <span class="no ${on?'on':''}">${on?ICON.check.replace('<svg','<svg style="width:13px;height:13px;stroke:#fff;stroke-width:2.4;fill:none"'):i+1}</span>
+              <span class="tx"><div class="nm">${esc(e.nome)}</div><div class="ds">${doseText(it,false)}</div></span>${ICON.chev}
+            </button>
+            ${open ? `<div class="ex-body">
+              ${e.youtube_id ? `<button class="vid" style="background-image:url('https://i.ytimg.com/vi/${encodeURIComponent(e.youtube_id)}/hqdefault.jpg')" data-yt="${esc(e.youtube_id)}" aria-label="Assistir ao vídeo"><span class="play">${ICON.play}</span></button>`
+                             : `<div class="vid">Vídeo em breve</div>`}
+              <p class="dose">${doseText(it)}${it.frequencia?`, ${esc(it.frequencia)}`:''}</p>
+              ${e.descricao ? `<p>${esc(e.descricao)}</p>` : ''}
+              ${e.dicas ? `<p><b>Atenção:</b> ${esc(e.dicas)}</p>` : ''}
+              ${it.observacoes ? `<p class="mine"><b>Para você:</b> ${esc(it.observacoes)}</p>` : ''}
+              <button class="btn ${on?'line':''}" data-done="${it.id}">${on?'Feito hoje. Toque para desfazer':'Marcar como feito'}</button>
+            </div>` : ''}
+          </li>`; }).join('')}</ul>
+      </section>`).join('');
+    el.querySelectorAll('[data-toggle]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.toggle; openEx.has(id) ? openEx.delete(id) : openEx.add(id); render.exercicios();
+    }));
     el.querySelectorAll('[data-yt]').forEach(b => b.addEventListener('click', () => {
       b.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(b.dataset.yt)}?autoplay=1&rel=0&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Vídeo do exercício"></iframe>`;
     }, {once:true}));
@@ -781,85 +650,76 @@ const render = {
 
   avaliacoes() {
     const el = $('#v-avaliacoes'), av = S.avaliacoes, ser = metricSeries();
-    if (!av.length) { el.innerHTML = `<h1 class="page-h">Avaliações</h1><p class="empty">Suas avaliações aparecem aqui assim que eu liberar.</p>`; return; }
-    el.innerHTML = `<h1 class="page-h">Sua <span>evolução</span></h1>
-      <p class="page-lede">Avaliações mensais de evolução e reavaliações, liberadas depois de cada consulta.</p>
-      ${ser.length ? `<section class="sec"><div class="sec-h"><h2>Comparando</h2><span class="aside">primeira → mais recente</span></div>
-        <div class="evo">${ser.map(s => `<div class="evo-i"><div class="n">${esc(s.n)}</div>
-          <div class="v"><s>${s.vals[0]} →</s> ${s.vals[s.vals.length-1]}<small>${esc(s.u)}</small></div>${spark(s.vals)}</div>`).join('')}</div></section>` : ''}
-      <section class="sec"><div class="sec-h"><h2>Histórico</h2><span class="aside">${av.length} ${av.length>1?'avaliações':'avaliação'}</span></div>
-        <ol class="tl">${av.map(a => `<li>
-          <time datetime="${esc(a.data)}"><b>${fmt(a.data,{day:'numeric'})} ${shortMonth(a.data)}</b>${fmt(a.data,{year:'numeric'})}</time>
-          <div>
-            <div class="kind">${TIPO[a.tipo]||''}${a.regiao?`, ${esc(a.regiao.toLowerCase())}`:''}</div>
-            <h3>${esc(a.titulo)}</h3>
+    if (!av.length) { el.innerHTML = `<h1 class="t">Evolução</h1><p class="empty">Suas avaliações aparecem aqui quando eu liberar.</p>`; return; }
+    el.innerHTML = `<h1 class="t">Evolução</h1>
+      <p class="sub">Da primeira avaliação até a mais recente.</p>
+      ${ser.length ? `<section class="block">${ser.map(s => `<div class="metric"><span>${esc(s.n)}</span>
+        <span class="v"><s>${s.vals[0]} → </s><b>${s.vals[s.vals.length-1]}</b><small>${esc(s.u)}</small></span></div>`).join('')}</section>` : ''}
+      <section class="block">
+        <div class="bh"><h2>Avaliações</h2></div>
+        <ul class="list">${av.map(a => { const open = openAv.has(a.id); return `<li class="${open?'ex-open':''}">
+          <button class="item" data-av="${a.id}" aria-expanded="${open}"><span class="tx"><div class="nm">${esc(a.titulo)}</div><div class="ds">${TIPO[a.tipo]||''}, ${shortDate(a.data)} ${fmt(a.data,{year:'numeric'})}</div></span>${ICON.chev}</button>
+          ${open ? `<div class="av-body">
             ${a.resumo ? `<p>${esc(a.resumo)}</p>` : ''}
-            ${(a.metricas||[]).length ? `<div class="nums">${a.metricas.map(m=>`<div>${esc(m.nome)}<b>${esc(m.valor)}<small>${esc(m.unidade||'')}</small></b></div>`).join('')}</div>` : ''}
-            ${a.arquivo_path ? `<button class="btn sm" data-pdf="${esc(a.arquivo_path)}">Abrir relatório em PDF</button>` : ''}
-          </div></li>`).join('')}</ol></section>`;
+            ${(a.metricas||[]).length ? `<div class="nums">${a.metricas.map(m=>`<div>${esc(m.nome)}<b>${esc(m.valor)} <small class="muted">${esc(m.unidade||'')}</small></b></div>`).join('')}</div>` : ''}
+            ${a.arquivo_path ? `<button class="btn line" data-pdf="${esc(a.arquivo_path)}">Abrir relatório em PDF</button>` : ''}
+          </div>` : ''}</li>`; }).join('')}</ul>
+      </section>`;
+    el.querySelectorAll('[data-av]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.av; openAv.has(id) ? openAv.delete(id) : openAv.add(id); render.avaliacoes();
+    }));
     el.querySelectorAll('[data-pdf]').forEach(b => b.addEventListener('click', async () => {
       const w = window.open('', '_blank');
       try { const url = await api.pdfUrl(b.dataset.pdf); if (url) w.location = url; else w.close(); }
-      catch { w.close(); toast('Não deu para abrir o relatório agora. Tente de novo em instantes.'); }
+      catch { w.close(); toast('Não deu para abrir o relatório agora.'); }
     }));
   },
 
   recados() {
     const el = $('#v-recados');
-    el.innerHTML = `<h1 class="page-h">Recados</h1>
-      <p class="page-lede">Orientações que deixo entre uma consulta e outra.</p>
-      ${S.recados.length ? `<ul class="msgs">${S.recados.map(r => `<li class="${r.lido_em?'':'unread'}">
-          <span class="av">IN</span>
-          <div><div class="meta"><b>Isack</b><span>${relDay(r.criado_em)}, ${hhmm(r.criado_em)}</span>${r.lido_em?'':'<span class="new">novo</span>'}</div>
-          <p>${esc(r.texto)}</p></div></li>`).join('')}</ul>`
-        : `<p class="empty">Nenhum recado por enquanto.</p>`}
-      <div class="talk"><p>Quer responder ou tirar uma dúvida?</p>
-        <a class="btn" href="${waLink('Olá, Isack! Sobre o recado na área do paciente: ')}" target="_blank" rel="noopener">Responder no WhatsApp</a></div>`;
+    el.innerHTML = `<h1 class="t">Recados</h1>
+      <section class="block">${S.recados.length ? S.recados.map(r => `<div class="msg">
+          <div class="from"><span class="av">IN</span><span><b>Isack</b>, ${relDay(r.criado_em)}</span>${r.lido_em?'':'<span class="new" aria-label="novo"></span>'}</div>
+          <p>${esc(r.texto)}</p></div>`).join('') : `<p class="empty">Nenhum recado por enquanto.</p>`}</section>
+      <section class="block"><a class="btn line" href="${waLink('Olá, Isack! Sobre o recado: ')}" target="_blank" rel="noopener">Responder no WhatsApp</a></section>`;
     const unread = S.recados.filter(r => !r.lido_em);
     if (unread.length) {
       Promise.all(unread.map(r => api.markRead(r.id))).catch(()=>{});
-      setTimeout(() => { const now = new Date().toISOString(); unread.forEach(r => r.lido_em = now); marks(); }, 1200);
+      setTimeout(() => { const now = new Date().toISOString(); unread.forEach(r => r.lido_em = now); marks(); }, 1500);
     }
   },
 
   agenda() {
     const el = $('#v-agenda'), now = new Date();
     const fut = S.agendamentos.filter(a => new Date(a.inicio) >= now);
-    const past = S.agendamentos.filter(a => new Date(a.inicio) < now).reverse().slice(0,10);
+    const past = S.agendamentos.filter(a => new Date(a.inicio) < now).reverse().slice(0,8);
     const ST = {agendado:'Agendado', confirmado:'Confirmado', realizado:'Realizado', cancelado:'Cancelado', faltou:'Falta'};
-    const [n, ...rest] = fut;
-    const row = a => `<li><div class="d">${fmt(a.inicio,{day:'numeric'})}<small>${shortMonth(a.inicio)}</small></div>
-        <div><h4>${esc(a.tipo||'Atendimento')}</h4><p>${weekday(a.inicio)}, ${hhmm(a.inicio)}${a.fim?` às ${hhmm(a.fim)}`:''}</p></div>
-        <div class="st">${ST[a.status]||esc(a.status)}</div></li>`;
-    el.innerHTML = `<h1 class="page-h">Sua <span>agenda</span></h1>
-      ${n ? `<div class="soon"><div class="big">${fmt(n.inicio,{day:'numeric'})}<span>${fmt(n.inicio,{month:'long'})}</span></div>
-          <div><h3>${esc(n.tipo||'Atendimento')}</h3>
-          <p>${weekday(n.inicio)}${['hoje','amanhã'].includes(relDay(n.inicio))?` (${relDay(n.inicio)})`:''}, das ${hhmm(n.inicio)}${n.fim?` às ${hhmm(n.fim)}`:''}</p>${n.local?`<p>${esc(n.local)}</p>`:''}
-          <p class="state">${ST[n.status]||''}</p></div></div>`
-        : `<p class="empty">Você não tem horário marcado.</p>`}
-      ${rest.length ? `<section class="sec"><div class="sec-h"><h2>Depois</h2></div><ul class="alist">${rest.map(row).join('')}</ul></section>` : ''}
-      <div class="talk"><p>Precisa marcar, trocar ou cancelar um horário?</p>
-        <a class="btn" href="${waLink('Olá, Isack! Preciso marcar ou remarcar um horário.')}" target="_blank" rel="noopener">Combinar no WhatsApp</a></div>
-      ${past.length ? `<section class="sec"><div class="sec-h"><h2>Anteriores</h2></div><ul class="alist past">${past.map(row).join('')}</ul></section>` : ''}`;
+    const row = (a,first) => `<div class="appt ${first?'first':''}">
+      <div class="d"><b>${fmt(a.inicio,{day:'numeric'})}</b><small>${fmt(a.inicio,{month:'short'}).replace('.','')}</small></div>
+      <div class="tx"><div class="nm">${esc(a.tipo||'Atendimento')}</div><div class="ds">${weekday(a.inicio)}, ${hhmm(a.inicio)}${first&&a.local?`<br>${esc(a.local)}`:''}</div></div>
+      <span class="st">${ST[a.status]||''}</span></div>`;
+    el.innerHTML = `<h1 class="t">Agenda</h1>
+      <section class="block">${fut.length ? fut.map((a,i)=>row(a,i===0)).join('') : `<p class="empty">Você não tem horário marcado.</p>`}</section>
+      <section class="block"><a class="btn line" href="${waLink('Olá, Isack! Preciso marcar ou remarcar um horário.')}" target="_blank" rel="noopener">Marcar ou remarcar no WhatsApp</a></section>
+      ${past.length ? `<section class="block past"><div class="bh"><h2>Anteriores</h2></div>${past.map(a=>row(a,false)).join('')}</section>` : ''}`;
   },
 
   perfil() {
     const p = S.paciente;
-    $('#v-perfil').innerHTML = `<h1 class="page-h">Meus <span>dados</span></h1>
-      <div class="form-block">
-        <div class="ro"><span>Nome</span><p>${esc(p.nome)}</p></div>
-        <div class="ro"><span>E-mail</span><p>${esc(p.email||'Não informado')}</p></div>
-        <form id="fTel" class="inline"><label class="field"><span>WhatsApp</span><input id="pTel" type="tel" value="${esc(p.telefone||'')}"></label><button class="btn sm" type="submit">Salvar</button></form>
-        <div id="telMsg" class="flash"></div>
-      </div>
-      <section class="sec form-block">
-        <div class="sec-h"><h2>Senha</h2></div>
-        <form id="fPass" class="inline"><label class="field"><span>Nova senha</span><input id="pPass" type="password" minlength="8" autocomplete="new-password" required></label><button class="btn sm" type="submit">Trocar</button></form>
-        <div id="passMsg" class="flash"></div>
+    $('#v-perfil').innerHTML = `<h1 class="t">Meus dados</h1>
+      <section class="block">
+        <div class="ro"><span>Nome</span>${esc(p.nome)}</div>
+        <div class="ro"><span>E-mail</span>${esc(p.email||'Não informado')}</div>
+        <form id="fTel" class="inline"><label class="field"><span>WhatsApp</span><input id="pTel" type="tel" value="${esc(p.telefone||'')}"></label><button class="btn" type="submit">Salvar</button></form>
+        <p id="telMsg" class="flash"></p>
       </section>
-      <section class="sec form-block">
-        <p class="muted">Seus dados são usados só no seu acompanhamento. <a href="#" class="txt-link" data-open="termos">Leia o termo de privacidade</a>. Para pedir a exclusão, fale comigo no WhatsApp.</p>
-        <button class="btn" style="margin-top:24px" id="logout">${DEMO?'Sair da demonstração':'Sair da conta'}</button>
+      <section class="block">
+        <form id="fPass" class="inline"><label class="field"><span>Nova senha</span><input id="pPass" type="password" minlength="8" autocomplete="new-password" required></label><button class="btn" type="submit">Trocar</button></form>
+        <p id="passMsg" class="flash"></p>
+      </section>
+      <section class="block">
+        <p class="muted" style="font-size:.9rem">Seus dados são usados só no seu acompanhamento. <a href="#" class="link" data-open="termos">Termo de privacidade</a>.</p>
+        <button class="btn line" style="margin-top:20px" id="logout">${DEMO?'Sair da demonstração':'Sair da conta'}</button>
       </section>`;
     $('#fTel').addEventListener('submit', async e => {
       e.preventDefault(); const t = $('#pTel').value.trim();
